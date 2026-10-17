@@ -1,0 +1,28 @@
+{
+  "name": "agent-skills",
+  "version": "0.1.0",
+  "private": true,
+  "description": "addyosmani/agent-skills fork with a pi flow: /spec -> /plan (design arena) -> /build (worktree, no per-task review) -> /review (persona panel).",
+  "keywords": ["pi-package"],
+  "license": "MIT",
+  "pi": {
+    "skills": [
+      "./skills",
+      "!skills/using-agent-skills",
+      "!skills/spec-driven-development",
+      "!skills/planning-and-task-breakdown",
+      "!skills/incremental-implementation",
+      "!skills/interview-me",
+      "!skills/doubt-driven-development",
+      "!skills/code-review-and-quality",
+      "!skills/context-engineering",
+      "!skills/git-workflow-and-versioning",
+      "./pi/skills"
+    ],
+    "prompts": ["./pi/prompts/*.md"],
+    "subagents": {
+      "agents": ["./agents"],
+      "workflows": ["./pi/workflows"]
+    }
+  }
+}
