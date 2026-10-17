@@ -38,4 +38,6 @@ It runs in the background. Wait for the completion notification, do not poll.
 - Check off the finished tasks in `plan.md` (main checkout).
 - Report one line per task (commit, deviation if any), the final verify result as evidence, the worktree path, and the branch. Next step: `/review`.
 
+Task commits are unsigned checkpoints (`git -c commit.gpgsign=false commit`), so no signing prompt interrupts the run. `/review` squashes them into one commit at the end.
+
 Never push. Never touch the main checkout's working tree beyond `.specs/`.

@@ -19,13 +19,22 @@ Call `SubagentWorkflow` with `name: "as-design-arena"` and `args: { specPath, re
 
 The default lenses are minimal, domain, and caller. When the spec suggests sharper angles (say "offline-first" against "server-authoritative"), pass `lenses` with two or three structurally different briefs instead.
 
-## 3. Pick, graft, check
+## 3. Compare, then let the user decide
 
-- Read every candidate and the judge's verdict in full. Score against the judge's rubric yourself. If you and the judge agree on the base, go with it. If you disagree, read both rationales, decide, and say why.
-- If the candidates converged, that is strong agreement. Use the shared shape.
-- If they diverge wildly, the spec leaves something open. Turn it into a question for the user. Do not average designs.
-- Graft one or two ideas from the other candidates by hand, so the result stays one coherent shape.
-- Check the result against the real code: the named files and functions exist, and the signatures fit the call sites.
+The judge and you recommend. The user decides. Never settle a design conflict silently.
+
+Read every candidate and the judge's verdict in full. Score against the judge's rubric yourself. Then:
+
+- **Converged, no forks, and you agree with the judge:** go to step 4. List the grafts as decisions in the plan so the user can veto them.
+- **Otherwise (the candidates differ in shape, the judge lists forks, or you disagree with the judge): stop here, before writing tasks.** Send a design decision message:
+  1. Per candidate, 3-4 lines: the shape, its strength, its weakness, the judge's scores.
+  2. The conflicts per `../../references/panel-synthesis.md` as ⚖️ items. Each has options A and B with who backs them (candidate, judge, you), a concrete example per option, the judge's recommendation, and yours. If you disagree with the judge, say so in that item.
+  3. The proposed grafts, numbered, so the user can accept or drop each.
+
+  Ask the user to decide and end your turn. Write the plan only from the user's answers.
+- If the candidates diverge wildly, the spec leaves something open. Name the open spec point in the message. Do not average designs.
+
+When you write the design, graft by hand so the result stays one coherent shape. Check it against the real code: the named files and functions exist, and the signatures fit the call sites.
 
 ## 4. Write the plan
 
@@ -40,7 +49,8 @@ Nutzung (2-3 echte Aufrufstellen) → Typen und Signaturen → Modul-Karte → D
 Signaturen als Code, Bodies `not implemented`.
 
 ## Entscheidungen
-| Frage | Gewählt | Verworfen | Warum |
+| Frage | Gewählt | Verworfen | Warum | Entschieden von |
+(Entschieden von: Nutzer, Konsens, oder Empfehlung (unbestätigt))
 
 ## Ausführung
 - Verify: `<voller Test-Befehl, mit knappem Reporter>`
@@ -68,6 +78,6 @@ Task rules:
 
 ## 5. Stop for approval
 
-Send: the plan path, the design in 5-8 lines, the decisions table, the open design points merged per `../../references/panel-synthesis.md` (the judge's forks plus your own), and the tasks one line each. Ask "Freigeben oder korrigieren?" and end your turn.
+Send: the plan path, the design in 5-8 lines, the decisions table, every decision still marked "Empfehlung (unbestätigt)" as a numbered item, and the tasks one line each. Ask "Freigeben oder korrigieren?" and end your turn.
 
 On approval: set `Status: freigegeben <date>` and name the next step: `/build <plan path>`, ideally in a fresh session.

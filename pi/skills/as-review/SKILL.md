@@ -26,8 +26,18 @@ Call `SubagentWorkflow` with `name: "as-final-review"` and `args: { worktree, ba
 
 Send the verdict with numbered items and end your turn. Apply nothing yet.
 
-The user picks numbers. Fix those in the worktree, one commit per fix, and run verify after each. No new review round unless the user asks for one.
+The user picks numbers. Fix those in the worktree, one unsigned checkpoint commit per fix tagged `[review-<n>]`, and run verify after each. No new review round unless the user asks for one.
 
 ## 5. Finish
 
-When the user is done, offer: merge `feat/<topic>` into the base locally, push the branch for a merge request, or keep it. Remove the worktree only after the merge (`git worktree remove`). Never push without being asked.
+When the user says done, squash the checkpoints into one commit in the worktree:
+
+```bash
+git branch feat/<topic>-checkpoints        # backup of the checkpoint history
+git reset --soft <base>
+git commit -F <message>                     # signs per the user's git config
+```
+
+Write the message from spec and plan: a conventional subject line, three to five lines of what changed for callers, and a last line such as `Spec: AK1-AK4 · Tasks: T1-T3 · Review fixes: 2`. Check `git diff --quiet feat/<topic>-checkpoints HEAD` before going on.
+
+Then offer: fast-forward the base locally, push the branch for a merge request, or keep it. After the merge, remove the worktree (`git worktree remove`) and the checkpoint branch. Never push without being asked.

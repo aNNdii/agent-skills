@@ -34,6 +34,7 @@ const SCHEMA = {
           title: { type: 'string' },
           detail: { type: 'string', description: 'The concrete failure path: input, steps, wrong result' },
           recommendation: { type: 'string' },
+          example: { type: 'string', description: 'A concrete repro: input or call and the wrong result, or the 2-3 offending lines' },
           confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
         },
         required: ['severity', 'file', 'title', 'detail', 'recommendation', 'confidence'],

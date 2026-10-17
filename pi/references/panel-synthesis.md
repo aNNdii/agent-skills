@@ -28,6 +28,16 @@ You can see the whole context, the reviewers saw a slice. For every item:
 
 Within each class, order by impact: blocks the build, changes the design, minor.
 
+## Examples
+
+Every ⚖️ option, and every recommendation whose effect is not obvious from the sentence, gets a concrete example so the user sees the difference without reading code. Pick the smallest form that shows it:
+
+- an input and the output under each option: `slugify('a b', { maxLength: null })` → A: `'a-b'` · B: TypeError
+- two or three lines of code showing the call site or shape
+- a short scenario: "user saves twice within a second → A: one row · B: two rows"
+
+Use the reviewers' examples when they fit, and write your own when they don't. Never invent behavior the code or the design does not have.
+
 ## 4. Format
 
 Number every item across all classes so the user can answer tersely ("1 ok, 2 B, 4: lieber X").
@@ -35,11 +45,14 @@ Number every item across all classes so the user can answer tersely ("1 ok, 2 B,
 ```markdown
 ### ✅ Konsens
 1. **<Thema>.** <Frage/Befund in einem Satz.> Empfehlung: <konkret>. (<Linsen>)
+   Beispiel: <Eingabe → Ergebnis>   (nur wenn nicht offensichtlich)
 
 ### ⚖️ Uneinig
 2. **<Thema>.** <Frage in einem Satz.>
    - A (<Linsen>): <Option>. <Begründung>
+     Beispiel: <Eingabe → Ergebnis unter A>
    - B (<Linsen>): <Option>. <Begründung>
+     Beispiel: <Eingabe → Ergebnis unter B>
    - Meine Empfehlung: A, weil <Grund>.
 
 ### ❓ Einzeln
@@ -49,4 +62,4 @@ Number every item across all classes so the user can answer tersely ("1 ok, 2 B,
 - <Punkt>: <Grund>.
 ```
 
-Reply in the user's language. Keep each item to two or three lines.
+Reply in the user's language. Keep each item to two or three lines plus its example.
