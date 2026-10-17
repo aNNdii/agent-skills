@@ -7,6 +7,8 @@ description: Phase 4 of the /spec → /plan → /build → /review flow. Use onl
 
 Input: the plan (path from the request, else the newest `.specs/*/plan.md`), its worktree and feature branch from the build report, and the base from the plan.
 
+Language rules: `../../references/language.md`.
+
 ## 1. Evidence
 
 Run in the worktree: `git diff --stat <base>...HEAD`, `git log --oneline <base>..HEAD`, and the verify command once (short output).
@@ -18,13 +20,13 @@ Call `SubagentWorkflow` with `name: "as-final-review"` and `args: { worktree, ba
 ## 3. Verify and merge
 
 - Open every critical or important finding at its file:line and confirm the failure path yourself before you list it.
-- Merge per `../../references/panel-synthesis.md`. Findings two personas raise, or that you confirmed, are ✅ Konsens.
+- Merge per `../../references/panel-synthesis.md`. Findings two personas raise, or that you confirmed, are consensus items.
 - Sort into **Act on** (would block a real PR), **Consider**, **Noted**, **Dismissed** (one line each with the reason).
 - Add an acceptance table: each criterion from the spec, met, partial, or missing, with evidence.
 
 ## 4. Stop
 
-Save the verdict to `<spec dir>/review.md`, set the plan to `Status: reviewt <date>`, then send the verdict with numbered items and end your turn. Apply nothing yet.
+Save the verdict to `<spec dir>/review.md`, set the plan to `Status: reviewed <date>`, then send the verdict with numbered items and end your turn. Apply nothing yet.
 
 The user picks numbers. Fix those in the worktree, one unsigned checkpoint commit per fix tagged `[review-<n>]`, and run verify after each. No new review round unless the user asks for one.
 
@@ -38,6 +40,6 @@ git reset --soft <base>
 git commit -F <message>                     # signs per the user's git config
 ```
 
-Write the message from spec and plan: a conventional subject line, three to five lines of what changed for callers, and a last line such as `Spec: AK1-AK4 · Tasks: T1-T3 · Review fixes: 2`. Check `git diff --quiet feat/<topic>-checkpoints HEAD` before going on.
+Write the message from spec and plan: a conventional subject line, three to five lines of what changed for callers, and a last line such as `Spec: AC1-AC4 · Tasks: T1-T3 · Review fixes: 2`. Commit messages are always English. Check `git diff --quiet feat/<topic>-checkpoints HEAD` before going on.
 
-Then offer: fast-forward the base locally, push the branch for a merge request, or keep it. After the merge, remove the worktree (`git worktree remove`) and the checkpoint branch. Set the plan to `Status: abgeschlossen <date>` with the commit or merge request. Never push without being asked.
+Then offer: fast-forward the base locally, push the branch for a merge request, or keep it. After the merge, remove the worktree (`git worktree remove`) and the checkpoint branch. Set the plan to `Status: done <date>` with the commit or merge request. Never push without being asked.

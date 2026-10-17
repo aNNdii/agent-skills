@@ -1,13 +1,13 @@
 ---
 name: as-spec
-description: Phase 1 of the /spec → /plan → /build → /review flow. Use only when the user runs /spec or explicitly asks to start a spec for a feature. Clarifies assumptions in rounds, writes a one-page spec, runs a three-lens spec review, then stops for approval.
+description: Phase 1 of the /spec → /plan → /build → /review flow. Use only when the user runs /spec or explicitly asks to start a spec for a feature. Clarifies intent and details, writes a one-page spec, runs a three-lens spec review, then stops for approval.
 ---
 
 # Spec
 
 Goal: a one-page spec the user approved, that a builder can implement without asking back.
 
-No product code, scaffolding, or dependency installs in this phase. Reading and exploring are fine.
+No product code, scaffolding, or dependency installs in this phase. Reading and exploring are fine. Language rules: `../../references/language.md`.
 
 ## 1. Recon
 
@@ -17,11 +17,11 @@ If the request is trivially clear (a one-liner, a rename), say so and suggest do
 
 ## 2. Clarify
 
-After recon, decide which mode fits and say it in one line. Ask in the user's language.
+After recon, decide which mode fits and say it in one line.
 
 ### 2a. Intent mode: the goal itself is unclear
 
-Use it when you cannot say in two sentences what they want, for whom, and why. Use it as well whenever the request says "einzeln", "grill me", or "interview me". In that case keep asking one question per message for the whole clarification.
+Use it when you cannot say in two sentences what they want, for whom, and why. Also use it whenever the user asks for one question at a time ("one by one", "grill me", "interview me", or the same in their language). In that case keep one question per message for the whole clarification.
 
 - One question per message about the why: the moment they miss this, who it is for, what success looks like, what would make it a failure even if it technically works.
 - Anchor in specifics ("Walk me through the last time..."). Add your guess so they can correct it instead of starting from zero. Mention what the code showed when it matters.
@@ -31,43 +31,43 @@ Deeper technique: `../../../skills/interview-me/SKILL.md`.
 
 ### 2b. Detail rounds: the goal is clear
 
-One message per round:
+One message per round with three parts:
 
-1. **Verstanden:** what you think they want and why, in 3-5 sentences.
-2. **Annahmen:** a numbered list. Mark each as your guess. "Korrigier mich, sonst gelten sie."
-3. **Fragen:** every open point whose answer changes what gets built, numbered, most important first. Each with your recommendation and a one-line reason, so "ok" is a valid answer. Many questions in one round are fine.
+1. **Understood:** what you think they want and why, in 3-5 sentences.
+2. **Assumptions:** a numbered list. Mark each as your guess and say they hold unless corrected.
+3. **Questions:** every open point whose answer changes what gets built, numbered, most important first. Each with your recommendation, a one-line reason, and an example when the effect is not obvious, so "ok" is a valid answer. Many questions in one round are fine.
 
-Turn vague goals into checkable criteria ("schneller" becomes "p95 unter 200 ms für X"). Repeat rounds until no open point changes what gets built. Then write the spec.
+Turn vague goals into checkable criteria ("faster" becomes "p95 under 200 ms for X"). Repeat rounds until no open point changes what gets built. Then write the spec.
 
 ## 3. Write the spec
 
 Path: `<repo>/.specs/<YYYY-MM-DD>-<topic>/spec.md`. Spec and plan are never committed: make sure `.specs/` is listed in `.git/info/exclude` (append it if missing, never edit `.gitignore`).
 
-At most one page. Drop empty sections. Mark every decision you made yourself with "(Annahme)" or "(meine Wahl)".
+At most one page. Drop empty sections. Mark every decision you made yourself as an assumption or your call.
 
 ```markdown
-# Spec: <Titel>
-Status: Entwurf
+# Spec: <title>
+Status: draft
 
-## Ziel
-Wer, was, warum. 2-4 Sätze.
+## Goal
+Who, what, why. 2-4 sentences.
 
-## Nicht-Ziele
+## Non-goals
 
-## Verhalten und Akzeptanzkriterien
-- [ ] AK1: <prüfbare Aussage, z. B. Given/When/Then>
+## Behavior and acceptance criteria
+- [ ] AC1: <checkable statement, e.g. Given/When/Then>
 
-## Randfälle und Fehler
+## Edge cases and errors
 
-## Grenzen
-- Immer: ...
-- Erst fragen: ...
-- Nie: ...
+## Boundaries
+- Always: ...
+- Ask first: ...
+- Never: ...
 
-## Kontext aus dem Code
-Betroffene Stellen mit Pfad, Test-Befehl, Konventionen.
+## Context from the code
+Affected places with paths, test command, conventions.
 
-## Offene Punkte
+## Open points
 ```
 
 ## 4. Spec review
@@ -78,6 +78,6 @@ Merge the result per `../../references/panel-synthesis.md`. Resolve items the sp
 
 ## 5. Stop for approval
 
-Send: the spec path, a 3-5 line summary, and the synthesized review items. Ask "Freigeben oder korrigieren?" and end your turn.
+Send: the spec path, a 3-5 line summary, and the synthesized review items. Ask whether to approve or correct, and end your turn.
 
-On answers: update the spec, report only which decisions changed, and ask again only if new open points arose. On approval: set `Status: freigegeben <date>` and name the next step: `/plan <spec path>`, ideally in a fresh session.
+On answers: update the spec, report only which decisions changed, and ask again only if new open points arose. On approval: set `Status: approved <date>` and name the next step: `/plan <spec path>`, ideally in a fresh session.

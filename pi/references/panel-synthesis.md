@@ -21,16 +21,16 @@ You can see the whole context, the reviewers saw a slice. For every item:
 
 ## 3. Classify
 
-- **✅ Konsens.** Two or more lenses, same recommendation. Or one lens, and you verified it. Present the recommendation for confirmation.
-- **⚖️ Uneinig.** Lenses recommend different things. Show each option with who backs it and why, then your recommendation and why.
-- **❓ Einzeln.** One lens, not yet verified. Show it with its recommendation. Lower signal.
-- **🗑️ Verworfen.** One line each with the reason. At the end, short.
+- **✅ Consensus.** Two or more lenses, same recommendation. Or one lens, and you verified it. Present the recommendation for confirmation.
+- **⚖️ Split.** Lenses recommend different things. Show each option with who backs it and why, then your recommendation and why.
+- **❓ Single.** One lens, not yet verified. Show it with its recommendation. Lower signal.
+- **🗑️ Dismissed.** One line each with the reason. At the end, short.
 
 Within each class, order by impact: blocks the build, changes the design, minor.
 
 ## Examples
 
-Every ⚖️ option, and every recommendation whose effect is not obvious from the sentence, gets a concrete example so the user sees the difference without reading code. Pick the smallest form that shows it:
+Every split option, and every recommendation whose effect is not obvious from the sentence, gets a concrete example so the user sees the difference without reading code. Pick the smallest form that shows it:
 
 - an input and the output under each option: `slugify('a b', { maxLength: null })` → A: `'a-b'` · B: TypeError
 - two or three lines of code showing the call site or shape
@@ -40,26 +40,26 @@ Use the reviewers' examples when they fit, and write your own when they don't. N
 
 ## 4. Format
 
-Number every item across all classes so the user can answer tersely ("1 ok, 2 B, 4: lieber X").
+Number every item across all classes so the user can answer tersely ("1 ok, 2 B, 4: rather X"). Write everything, headings included, in the user's language (`language.md`). The skeleton:
 
 ```markdown
-### ✅ Konsens
-1. **<Thema>.** <Frage/Befund in einem Satz.> Empfehlung: <konkret>. (<Linsen>)
-   Beispiel: <Eingabe → Ergebnis>   (nur wenn nicht offensichtlich)
+### ✅ Consensus
+1. **<topic>.** <question or finding in one sentence> Recommendation: <concrete>. (<lenses>)
+   Example: <input → result>   (only when not obvious)
 
-### ⚖️ Uneinig
-2. **<Thema>.** <Frage in einem Satz.>
-   - A (<Linsen>): <Option>. <Begründung>
-     Beispiel: <Eingabe → Ergebnis unter A>
-   - B (<Linsen>): <Option>. <Begründung>
-     Beispiel: <Eingabe → Ergebnis unter B>
-   - Meine Empfehlung: A, weil <Grund>.
+### ⚖️ Split
+2. **<topic>.** <question in one sentence>
+   - A (<lenses>): <option>. <reason>
+     Example: <input → result under A>
+   - B (<lenses>): <option>. <reason>
+     Example: <input → result under B>
+   - My recommendation: A, because <reason>.
 
-### ❓ Einzeln
-3. **<Thema>.** <...> Empfehlung: <...>. (<Linse>)
+### ❓ Single
+3. **<topic>.** <...> Recommendation: <...>. (<lens>)
 
-### 🗑️ Verworfen
-- <Punkt>: <Grund>.
+### 🗑️ Dismissed
+- <item>: <reason>.
 ```
 
-Reply in the user's language. Keep each item to two or three lines plus its example.
+Keep each item to two or three lines plus its example.

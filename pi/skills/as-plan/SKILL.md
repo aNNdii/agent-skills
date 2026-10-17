@@ -1,13 +1,13 @@
 ---
 name: as-plan
-description: Phase 2 of the /spec → /plan → /build → /review flow. Use only when the user runs /plan or explicitly asks to plan an approved spec. Runs a design arena (competing designs, cross-judge, graft), writes the design and a task plan, then stops for approval.
+description: Phase 2 of the /spec → /plan → /build → /review flow. Use only when the user runs /plan or explicitly asks to plan an approved spec. Runs a design arena (competing designs, cross-judge, graft), lets the user decide conflicts, writes the design and a task plan, then stops for approval.
 ---
 
 # Plan
 
-Input: an approved spec. Take the path from the request, else the newest `.specs/*/spec.md`. If its status is not `freigegeben`, stop and say so.
+Input: an approved spec. Take the path from the request, else the newest `.specs/*/spec.md`. If its status is not `approved`, stop and say so.
 
-No product code in this phase.
+No product code in this phase. Language rules: `../../references/language.md`.
 
 ## 1. Size check
 
@@ -30,7 +30,7 @@ Read every candidate and the judge's verdict in full. Score against the judge's 
 - **Converged, no forks, and you agree with the judge:** go to step 4. List the grafts as decisions in the plan so the user can veto them.
 - **Otherwise (the candidates differ in shape, the judge lists forks, or you disagree with the judge): stop here, before writing tasks.** Send a design decision message:
   1. Per candidate, 3-4 lines: the shape, its strength, its weakness, the judge's scores.
-  2. The conflicts per `../../references/panel-synthesis.md` as ⚖️ items. Each has options A and B with who backs them (candidate, judge, you), a concrete example per option, the judge's recommendation, and yours. If you disagree with the judge, say so in that item.
+  2. The conflicts per `../../references/panel-synthesis.md` as split items. Each has options A and B with who backs them (candidate, judge, you), a concrete example per option, the judge's recommendation, and yours. If you disagree with the judge, say so in that item.
   3. The proposed grafts, numbered, so the user can accept or drop each.
 
   Ask the user to decide and end your turn. Write the plan only from the user's answers.
@@ -43,33 +43,33 @@ When you write the design, graft by hand so the result stays one coherent shape.
 Write `<spec dir>/plan.md`. Not committed.
 
 ```markdown
-# Plan: <Titel>
-Status: Entwurf · Spec: spec.md
+# Plan: <title>
+Status: draft · Spec: spec.md
 
-## Entwurf
-Nutzung (2-3 echte Aufrufstellen) → Typen und Signaturen → Modul-Karte → Datenfluss.
-Signaturen als Code, Bodies `not implemented`.
+## Design
+Usage (2-3 real call sites) → types and signatures → module map → data flow.
+Signatures as code, bodies `not implemented`.
 
-## Entscheidungen
-| Frage | Gewählt | Verworfen | Warum | Entschieden von |
-(Entschieden von: Nutzer, Konsens, oder Empfehlung (unbestätigt))
+## Decisions
+| Question | Chosen | Rejected | Why | Decided by |
+(Decided by: user, consensus, or recommendation (unconfirmed))
 
-## Ausführung
-- Verify: `<voller Test-Befehl, mit knappem Reporter>`
-- Base: <branch> · Feature-Branch: feat/<topic>
-- Workstreams: einer | <Name: Tasks, Dateien> (nur bei disjunkten Dateien)
+## Execution
+- Verify: `<full test command, with a terse reporter>`
+- Base: <branch> · Feature branch: feat/<topic>
+- Workstreams: one | <name: tasks, files> (only for disjoint files)
 
 ## Tasks
-### T1: <Verb-Phrase>
-- Akzeptanz: <AK-Bezug, konkret>
-- Dateien: ...
-- Hängt ab von: —
-- Schwer: ja   (nur bei subtiler Logik; bekommt mehr Reasoning)
+### T1: <verb phrase>
+- Acceptance: <AC reference, concrete>
+- Files: ...
+- Depends on: —
+- Hard: yes   (only for subtle logic; gets more reasoning)
 
-## Abdeckung
-AK1 → T1, T3 · AK2 → T2
+## Coverage
+AC1 → T1, T3 · AC2 → T2
 
-## Risiken
+## Risks
 ```
 
 Task rules:
@@ -80,6 +80,6 @@ Task rules:
 
 ## 5. Stop for approval
 
-Send: the plan path, the design in 5-8 lines, the decisions table, every decision still marked "Empfehlung (unbestätigt)" as a numbered item, and the tasks one line each. Ask "Freigeben oder korrigieren?" and end your turn.
+Send: the plan path, the design in 5-8 lines, the decisions table, every decision still marked "recommendation (unconfirmed)" as a numbered item, and the tasks one line each. Ask whether to approve or correct, and end your turn.
 
-On approval: set `Status: freigegeben <date>` and name the next step: `/build <plan path>`, ideally in a fresh session.
+On approval: set `Status: approved <date>` and name the next step: `/build <plan path>`, ideally in a fresh session.

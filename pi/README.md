@@ -9,24 +9,24 @@ flowchart TD
     start(["/flow 'Feature X'"]):::cmd
 
     subgraph S1["1 · SPEC"]
-        recon["Recon<br/>liest den Code"]
-        mode{"Ziel klar?"}
-        intent["Absicht klären<br/>1 Frage pro Nachricht<br/>mit Vermutung"]
-        rounds["Detail-Runden: Verstanden ·<br/>Annahmen · Fragen mit Empfehlung"]
-        specmd[/"spec.md · max. 1 Seite"/]:::file
-        subgraph SR["Spec-Review · Opus medium · parallel"]
-            l1["Umsetzer"]
-            l2["Randfälle"]
-            l3["Umfang"]
+        recon["Recon<br/>reads the code"]
+        mode{"Goal clear?"}
+        intent["Clarify intent<br/>one question per message<br/>with a guess"]
+        rounds["Detail rounds: understood ·<br/>assumptions · questions with recommendation"]
+        specmd[/"spec.md · max. one page"/]:::file
+        subgraph SR["Spec review · Opus medium · parallel"]
+            l1["Builder"]
+            l2["Edge cases"]
+            l3["Scope"]
         end
-        syn1["Synthese ✅ ⚖️ ❓ 🗑️<br/>mit Beispielen"]
-        stop1{{"STOPP<br/>Spec freigeben?"}}:::stop
+        syn1["Synthesis ✅ ⚖️ ❓ 🗑️<br/>with examples"]
+        stop1{{"STOP<br/>approve spec?"}}:::stop
         recon --> mode
-        mode -->|nein| intent
-        intent -->|"du antwortest"| intent
-        intent -->|"Absicht klar"| rounds
-        mode -->|ja| rounds
-        rounds -->|"du antwortest"| rounds
+        mode -->|no| intent
+        intent -->|"you answer"| intent
+        intent -->|"intent clear"| rounds
+        mode -->|yes| rounds
+        rounds -->|"you answer"| rounds
         rounds --> specmd
         specmd --> l1 & l2 & l3
         l1 & l2 & l3 --> syn1
@@ -34,39 +34,39 @@ flowchart TD
     end
 
     subgraph S2["2 · PLAN"]
-        ground["Explorer<br/>Grounding"]
-        subgraph AR["Design-Arena · Opus high · parallel"]
+        ground["Explorer<br/>grounding"]
+        subgraph AR["Design arena · Opus high · parallel"]
             d1["minimal"]
             d2["domain"]
             d3["caller"]
         end
-        judge["Richter<br/>Rubrik · Basis · Übernahmen · Konflikte"]
+        judge["Judge<br/>rubric · base · grafts · forks"]
         arenamd[/"arena.md"/]:::file
-        conflict{"Konflikt oder<br/>Dissens?"}
-        stopD{{"STOPP<br/>Design-Entscheidung<br/>A / B + Beispiel + Empfehlung"}}:::stop
-        planmd[/"plan.md<br/>Entwurf · Entscheidungen · Tasks"/]:::file
-        stop2{{"STOPP<br/>Plan freigeben?"}}:::stop
+        conflict{"Conflict or<br/>dissent?"}
+        stopD{{"STOP<br/>design decision<br/>A / B + example + recommendation"}}:::stop
+        planmd[/"plan.md<br/>design · decisions · tasks"/]:::file
+        stop2{{"STOP<br/>approve plan?"}}:::stop
         ground --> d1 & d2 & d3
         d1 & d2 & d3 --> judge
         judge --> arenamd --> conflict
-        conflict -->|ja| stopD --> planmd
-        conflict -->|nein| planmd
+        conflict -->|yes| stopD --> planmd
+        conflict -->|no| planmd
         planmd --> stop2
     end
 
-    subgraph S3["3 · BUILD · läuft ohne dich durch"]
-        wt["Worktree + Branch feat/topic<br/>Baseline grün?"]
-        task["Task Tn: frischer Subagent<br/>RED → GREEN → verify"]
-        gate{"Gate:<br/>Tests grün?"}
-        cp["Checkpoint-Commit [Tn]<br/>unsigniert"]
-        retry["1 Retry"]
-        block{{"STOPP<br/>Blocker"}}:::stop
-        more{"weitere<br/>Tasks?"}
+    subgraph S3["3 · BUILD · runs without you"]
+        wt["Worktree + branch feat/topic<br/>baseline green?"]
+        task["Task Tn: fresh subagent<br/>RED → GREEN → verify"]
+        gate{"Gate:<br/>tests green?"}
+        cp["Checkpoint commit [Tn]<br/>unsigned"]
+        retry["1 retry"]
+        block{{"STOP<br/>blocker"}}:::stop
+        more{"more<br/>tasks?"}
         wt --> task --> gate
-        gate -->|ja| cp --> more
-        gate -->|nein| retry --> gate
-        retry -.->|"wieder rot"| block
-        more -->|ja| task
+        gate -->|yes| cp --> more
+        gate -->|no| retry --> gate
+        retry -.->|"red again"| block
+        more -->|yes| task
     end
 
     subgraph S4["4 · REVIEW"]
@@ -75,20 +75,20 @@ flowchart TD
             r2["security-auditor"]
             r3["test-engineer"]
         end
-        verify["Orchestrator prüft<br/>jeden Befund selbst"]
-        verdict[/"review.md<br/>Act on · Consider · Noted · Dismissed<br/>+ AK-Tabelle"/]:::file
-        stop3{{"STOPP<br/>Nummern wählen"}}:::stop
-        fixes["Fixes als Checkpoints [review-n]"]
-        squash["Squash → 1 signierter Commit"]
-        stop4{{"STOPP<br/>merge / push / behalten"}}:::stop
+        verify["Orchestrator verifies<br/>every finding itself"]
+        verdict[/"review.md<br/>Act on · Consider · Noted · Dismissed<br/>+ acceptance table"/]:::file
+        stop3{{"STOP<br/>pick numbers"}}:::stop
+        fixes["Fixes as checkpoints [review-n]"]
+        squash["Squash → one signed commit"]
+        stop4{{"STOP<br/>merge / push / keep"}}:::stop
         r1 & r2 & r3 --> verify
         verify --> verdict --> stop3 --> fixes --> squash --> stop4
     end
 
     start --> recon
-    stop1 -->|freigegeben| ground
-    stop2 -->|freigegeben| wt
-    more -->|nein| r1 & r2 & r3
+    stop1 -->|approved| ground
+    stop2 -->|approved| wt
+    more -->|no| r1 & r2 & r3
 
     classDef stop fill:#f9d5d3,stroke:#c0392b,stroke-width:2px,color:#000
     classDef file fill:#fff3c4,stroke:#b8860b,color:#000
@@ -98,7 +98,7 @@ flowchart TD
 
 | Command | Does | Stops for you |
 |---|---|---|
-| `/spec <request>` | Recon, then intent questions one at a time if the goal is unclear ("einzeln" forces it), then detail rounds with recommendations, one-page spec, three-lens spec review | yes |
+| `/spec <request>` | Recon, then intent questions one at a time if the goal is unclear ("one by one" forces it), then detail rounds with recommendations, one-page spec, three-lens spec review | yes |
 | `/plan [spec]` | Design arena: grounding, 2-3 competing designs (minimal, domain, caller), cross-judge, graft. Then the task plan | yes |
 | `/build [plan]` | Worktree on `feat/<topic>`, one fresh subagent per task, verify command as gate, one commit per task. No per-task review | only on blockers |
 | `/review [plan]` | code-reviewer, security-auditor, test-engineer in parallel on the branch diff. Verified, merged verdict | yes, applies nothing |
@@ -110,7 +110,7 @@ Spec and plan live in `<repo>/.specs/<date>-<topic>/` and are excluded via `.git
 
 - `pi/skills/as-*`: the four phases. Invoked through `pi/prompts/*.md`.
 - `pi/workflows/*.js`: deterministic fan-outs for `SubagentWorkflow` (pi-subagents). Reviewers run on Opus. Spec review uses medium effort, design, judge, and final review use high.
-- `pi/references/`: panel synthesis (Konsens, Uneinig, Einzeln, Verworfen) and design red flags.
+- `pi/references/`: panel synthesis (consensus, split, single, dismissed), design red flags, and language rules (talk and write specs in the user's language, keep repo text, status values, and ids in English).
 - `pi/skills/principles/`: three short pstack principles, auto-loaded when they apply.
 - `agents/`: the upstream personas, registered as pi subagents.
 
