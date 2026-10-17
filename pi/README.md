@@ -10,7 +10,9 @@ flowchart TD
 
     subgraph S1["1 · SPEC"]
         recon["Recon<br/>liest den Code"]
-        rounds["Runde: Verstanden · Annahmen ·<br/>Fragen mit Empfehlung"]
+        mode{"Ziel klar?"}
+        intent["Absicht klären<br/>1 Frage pro Nachricht<br/>mit Vermutung"]
+        rounds["Detail-Runden: Verstanden ·<br/>Annahmen · Fragen mit Empfehlung"]
         specmd[/"spec.md · max. 1 Seite"/]:::file
         subgraph SR["Spec-Review · Opus medium · parallel"]
             l1["Umsetzer"]
@@ -19,7 +21,11 @@ flowchart TD
         end
         syn1["Synthese ✅ ⚖️ ❓ 🗑️<br/>mit Beispielen"]
         stop1{{"STOPP<br/>Spec freigeben?"}}:::stop
-        recon --> rounds
+        recon --> mode
+        mode -->|nein| intent
+        intent -->|"du antwortest"| intent
+        intent -->|"Absicht klar"| rounds
+        mode -->|ja| rounds
         rounds -->|"du antwortest"| rounds
         rounds --> specmd
         specmd --> l1 & l2 & l3
@@ -92,7 +98,7 @@ flowchart TD
 
 | Command | Does | Stops for you |
 |---|---|---|
-| `/spec <request>` | Recon, rounds of assumptions and questions (each with a recommendation), one-page spec, three-lens spec review | yes |
+| `/spec <request>` | Recon, then intent questions one at a time if the goal is unclear ("einzeln" forces it), then detail rounds with recommendations, one-page spec, three-lens spec review | yes |
 | `/plan [spec]` | Design arena: grounding, 2-3 competing designs (minimal, domain, caller), cross-judge, graft. Then the task plan | yes |
 | `/build [plan]` | Worktree on `feat/<topic>`, one fresh subagent per task, verify command as gate, one commit per task. No per-task review | only on blockers |
 | `/review [plan]` | code-reviewer, security-auditor, test-engineer in parallel on the branch diff. Verified, merged verdict | yes, applies nothing |
@@ -108,7 +114,7 @@ Spec and plan live in `<repo>/.specs/<date>-<topic>/` and are excluded via `.git
 - `pi/skills/principles/`: three short pstack principles, auto-loaded when they apply.
 - `agents/`: the upstream personas, registered as pi subagents.
 
-The manifest hides upstream skills that the phases replace or that would fire on every change (`using-agent-skills`, `spec-driven-development`, `planning-and-task-breakdown`, `incremental-implementation`, `interview-me`, `doubt-driven-development`, `code-review-and-quality`, `context-engineering`, `git-workflow-and-versioning`). Every other upstream skill loads automatically when it applies.
+The manifest hides upstream skills that the phases replace or that would fire on every change (`using-agent-skills`, `spec-driven-development`, `planning-and-task-breakdown`, `incremental-implementation`, `interview-me`, `doubt-driven-development`, `code-review-and-quality`, `context-engineering`, `git-workflow-and-versioning`). `/spec` still reads `interview-me` by path for its intent mode. Every other upstream skill loads automatically when it applies.
 
 ## Update from upstream
 

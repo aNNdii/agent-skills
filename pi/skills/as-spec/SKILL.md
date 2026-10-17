@@ -15,15 +15,27 @@ Read before you ask. Explore the code the request touches. For more than a handf
 
 If the request is trivially clear (a one-liner, a rename), say so and suggest doing it directly without the flow. If it bundles several independent features, say so, propose an order, and spec one at a time.
 
-## 2. Clarify in rounds
+## 2. Clarify
 
-One message per round, in the user's language:
+After recon, decide which mode fits and say it in one line. Ask in the user's language.
+
+### 2a. Intent mode: the goal itself is unclear
+
+Use it when you cannot say in two sentences what they want, for whom, and why. Use it as well whenever the request says "einzeln", "grill me", or "interview me". In that case keep asking one question per message for the whole clarification.
+
+- One question per message about the why: the moment they miss this, who it is for, what success looks like, what would make it a failure even if it technically works.
+- Anchor in specifics ("Walk me through the last time..."). Add your guess so they can correct it instead of starting from zero. Mention what the code showed when it matters.
+- When you could state goal, user, and success criterion and they would nod, say so and switch to 2b. Carry everything over, never ask twice.
+
+Deeper technique: `../../../skills/interview-me/SKILL.md`.
+
+### 2b. Detail rounds: the goal is clear
+
+One message per round:
 
 1. **Verstanden:** what you think they want and why, in 3-5 sentences.
 2. **Annahmen:** a numbered list. Mark each as your guess. "Korrigier mich, sonst gelten sie."
 3. **Fragen:** every open point whose answer changes what gets built, numbered, most important first. Each with your recommendation and a one-line reason, so "ok" is a valid answer. Many questions in one round are fine.
-
-**Grill mode:** if the request says "grill me", "interview me", or "einzeln", ask one question per message instead of rounds, following `../../../skills/interview-me/SKILL.md`. Every question still carries your recommendation. Then continue with step 3.
 
 Turn vague goals into checkable criteria ("schneller" becomes "p95 unter 200 ms für X"). Repeat rounds until no open point changes what gets built. Then write the spec.
 

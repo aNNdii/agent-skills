@@ -3,7 +3,9 @@ flowchart TD
 
     subgraph S1["1 · SPEC"]
         recon["Recon<br/>liest den Code"]
-        rounds["Runde: Verstanden · Annahmen ·<br/>Fragen mit Empfehlung"]
+        mode{"Ziel klar?"}
+        intent["Absicht klären<br/>1 Frage pro Nachricht<br/>mit Vermutung"]
+        rounds["Detail-Runden: Verstanden ·<br/>Annahmen · Fragen mit Empfehlung"]
         specmd[/"spec.md · max. 1 Seite"/]:::file
         subgraph SR["Spec-Review · Opus medium · parallel"]
             l1["Umsetzer"]
@@ -12,7 +14,11 @@ flowchart TD
         end
         syn1["Synthese ✅ ⚖️ ❓ 🗑️<br/>mit Beispielen"]
         stop1{{"STOPP<br/>Spec freigeben?"}}:::stop
-        recon --> rounds
+        recon --> mode
+        mode -->|nein| intent
+        intent -->|"du antwortest"| intent
+        intent -->|"Absicht klar"| rounds
+        mode -->|ja| rounds
         rounds -->|"du antwortest"| rounds
         rounds --> specmd
         specmd --> l1 & l2 & l3
