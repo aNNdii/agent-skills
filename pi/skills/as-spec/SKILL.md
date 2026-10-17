@@ -23,6 +23,8 @@ One message per round, in the user's language:
 2. **Annahmen:** a numbered list. Mark each as your guess. "Korrigier mich, sonst gelten sie."
 3. **Fragen:** every open point whose answer changes what gets built, numbered, most important first. Each with your recommendation and a one-line reason, so "ok" is a valid answer. Many questions in one round are fine.
 
+**Grill mode:** if the request says "grill me", "interview me", or "einzeln", ask one question per message instead of rounds, following `../../../skills/interview-me/SKILL.md`. Every question still carries your recommendation. Then continue with step 3.
+
 Turn vague goals into checkable criteria ("schneller" becomes "p95 unter 200 ms für X"). Repeat rounds until no open point changes what gets built. Then write the spec.
 
 ## 3. Write the spec

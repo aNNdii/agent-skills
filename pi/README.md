@@ -4,6 +4,92 @@ This fork adds a pi layer on top of [addyosmani/agent-skills](https://github.com
 
 ## Flow
 
+```mermaid
+flowchart TD
+    start(["/flow 'Feature X'"]):::cmd
+
+    subgraph S1["1 · SPEC"]
+        recon["Recon<br/>liest den Code"]
+        rounds["Runde: Verstanden · Annahmen ·<br/>Fragen mit Empfehlung"]
+        specmd[/"spec.md · max. 1 Seite"/]:::file
+        subgraph SR["Spec-Review · Opus medium · parallel"]
+            l1["Umsetzer"]
+            l2["Randfälle"]
+            l3["Umfang"]
+        end
+        syn1["Synthese ✅ ⚖️ ❓ 🗑️<br/>mit Beispielen"]
+        stop1{{"STOPP<br/>Spec freigeben?"}}:::stop
+        recon --> rounds
+        rounds -->|"du antwortest"| rounds
+        rounds --> specmd
+        specmd --> l1 & l2 & l3
+        l1 & l2 & l3 --> syn1
+        syn1 --> stop1
+    end
+
+    subgraph S2["2 · PLAN"]
+        ground["Explorer<br/>Grounding"]
+        subgraph AR["Design-Arena · Opus high · parallel"]
+            d1["minimal"]
+            d2["domain"]
+            d3["caller"]
+        end
+        judge["Richter<br/>Rubrik · Basis · Übernahmen · Konflikte"]
+        arenamd[/"arena.md"/]:::file
+        conflict{"Konflikt oder<br/>Dissens?"}
+        stopD{{"STOPP<br/>Design-Entscheidung<br/>A / B + Beispiel + Empfehlung"}}:::stop
+        planmd[/"plan.md<br/>Entwurf · Entscheidungen · Tasks"/]:::file
+        stop2{{"STOPP<br/>Plan freigeben?"}}:::stop
+        ground --> d1 & d2 & d3
+        d1 & d2 & d3 --> judge
+        judge --> arenamd --> conflict
+        conflict -->|ja| stopD --> planmd
+        conflict -->|nein| planmd
+        planmd --> stop2
+    end
+
+    subgraph S3["3 · BUILD · läuft ohne dich durch"]
+        wt["Worktree + Branch feat/topic<br/>Baseline grün?"]
+        task["Task Tn: frischer Subagent<br/>RED → GREEN → verify"]
+        gate{"Gate:<br/>Tests grün?"}
+        cp["Checkpoint-Commit [Tn]<br/>unsigniert"]
+        retry["1 Retry"]
+        block{{"STOPP<br/>Blocker"}}:::stop
+        more{"weitere<br/>Tasks?"}
+        wt --> task --> gate
+        gate -->|ja| cp --> more
+        gate -->|nein| retry --> gate
+        retry -.->|"wieder rot"| block
+        more -->|ja| task
+    end
+
+    subgraph S4["4 · REVIEW"]
+        subgraph RV["Reviewer · Opus high · parallel"]
+            r1["code-reviewer"]
+            r2["security-auditor"]
+            r3["test-engineer"]
+        end
+        verify["Orchestrator prüft<br/>jeden Befund selbst"]
+        verdict[/"review.md<br/>Act on · Consider · Noted · Dismissed<br/>+ AK-Tabelle"/]:::file
+        stop3{{"STOPP<br/>Nummern wählen"}}:::stop
+        fixes["Fixes als Checkpoints [review-n]"]
+        squash["Squash → 1 signierter Commit"]
+        stop4{{"STOPP<br/>merge / push / behalten"}}:::stop
+        r1 & r2 & r3 --> verify
+        verify --> verdict --> stop3 --> fixes --> squash --> stop4
+    end
+
+    start --> recon
+    stop1 -->|freigegeben| ground
+    stop2 -->|freigegeben| wt
+    more -->|nein| r1 & r2 & r3
+
+    classDef stop fill:#f9d5d3,stroke:#c0392b,stroke-width:2px,color:#000
+    classDef file fill:#fff3c4,stroke:#b8860b,color:#000
+    classDef cmd fill:#d6eaf8,stroke:#2471a3,stroke-width:2px,color:#000
+```
+
+
 | Command | Does | Stops for you |
 |---|---|---|
 | `/spec <request>` | Recon, rounds of assumptions and questions (each with a recommendation), one-page spec, three-lens spec review | yes |
