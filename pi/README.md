@@ -10,6 +10,7 @@ This fork adds a pi layer on top of [addyosmani/agent-skills](https://github.com
 | `/plan [spec]` | Design arena: grounding, 2-3 competing designs (minimal, domain, caller), cross-judge, graft. Then the task plan | yes |
 | `/build [plan]` | Worktree on `feat/<topic>`, one fresh subagent per task, verify command as gate, one commit per task. No per-task review | only on blockers |
 | `/review [plan]` | code-reviewer, security-auditor, test-engineer in parallel on the branch diff. Verified, merged verdict | yes, applies nothing |
+| `/flow [request]` | Detects the phase from `.specs/` and git and runs the next one. Same stops as above | per phase |
 
 Spec and plan live in `<repo>/.specs/<date>-<topic>/` and are excluded via `.git/info/exclude`, never committed.
 

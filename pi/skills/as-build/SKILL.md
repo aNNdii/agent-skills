@@ -35,7 +35,7 @@ It runs in the background. Wait for the completion notification, do not poll.
 
 - **Blocked:** report the task, the reason, and the options. The user decides. Afterwards `/build` again resumes at the first missing task.
 - **Several workstreams:** merge each workstream branch into `feat/<topic>` and run verify after every merge. On a conflict, stop and report.
-- Check off the finished tasks in `plan.md` (main checkout).
+- Check off the finished tasks in `plan.md` (main checkout). When every task is done, set `Status: gebaut <date>` and add the worktree path and branch under `Ausführung`.
 - Report one line per task (commit, deviation if any), the final verify result as evidence, the worktree path, and the branch. Next step: `/review`.
 
 Task commits are unsigned checkpoints (`git -c commit.gpgsign=false commit`), so no signing prompt interrupts the run. `/review` squashes them into one commit at the end.

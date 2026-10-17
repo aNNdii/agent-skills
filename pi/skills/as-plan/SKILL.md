@@ -23,6 +23,8 @@ The default lenses are minimal, domain, and caller. When the spec suggests sharp
 
 The judge and you recommend. The user decides. Never settle a design conflict silently.
 
+First save the arena result to `<spec dir>/arena.md`: per candidate the summary, usage, types, and tasks, then the judge's scores, base, grafts, and forks with their examples. A later session resumes the design decision from this file.
+
 Read every candidate and the judge's verdict in full. Score against the judge's rubric yourself. Then:
 
 - **Converged, no forks, and you agree with the judge:** go to step 4. List the grafts as decisions in the plan so the user can veto them.
