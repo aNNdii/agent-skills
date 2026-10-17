@@ -2,6 +2,40 @@
 
 This fork adds a pi layer on top of [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills). Everything pi-specific lives in `pi/` and `package.json`. Upstream files stay untouched, so `git merge upstream/main` stays conflict-free.
 
+## Install
+
+Requires [pi](https://pi.dev) and the [pi-subagents](https://github.com/tintinweb/pi-subagents) extension, which runs the workflows and reviewer agents.
+
+```bash
+pi install npm:@tintinweb/pi-subagents
+pi install git:github.com/aNNdii/agent-skills
+```
+
+Use `git:git@github.com:aNNdii/agent-skills` to clone over SSH instead of HTTPS. Add `-l` to install into the current project only (`.pi/settings.json`).
+
+Remove other workflow packs that route skills on their own, so two flows don't compete:
+
+```bash
+pi remove git:github.com/obra/superpowers
+```
+
+Start a new pi session, then check:
+
+- `pi list` shows the package.
+- `/flow`, `/spec`, `/plan`, `/build`, and `/review` appear in the `/` menu.
+- `/agents` lists `code-reviewer`, `security-auditor`, and `test-engineer`.
+
+Update with `pi update`. Turn single skills or prompts on and off with `pi config`.
+
+### Developing the pack
+
+Install from a local clone instead. Pi loads it in place, so edits apply on the next session or `/reload`:
+
+```bash
+git clone git@github.com:aNNdii/agent-skills ~/development/agent-skills
+pi install ~/development/agent-skills
+```
+
 ## Flow
 
 ```mermaid
@@ -119,8 +153,11 @@ The manifest hides upstream skills that the phases replace or that would fire on
 ## Update from upstream
 
 ```bash
-git fetch upstream && git merge upstream/main
+git remote add upstream https://github.com/addyosmani/agent-skills.git   # once
+git fetch upstream && git merge upstream/main && git push
 ```
+
+Git installs pick the merge up with `pi update`.
 
 ## Credits
 

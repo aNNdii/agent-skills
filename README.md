@@ -1,5 +1,10 @@
 # Agent Skills
 
+> **This fork adds a pi flow** (`/flow` → spec, design arena, build in a worktree, reviewer panel).
+> Install: `pi install npm:@tintinweb/pi-subagents && pi install git:github.com/aNNdii/agent-skills`.
+> Details: [pi/README.md](pi/README.md).
+
+
 **Production-grade engineering skills for AI coding agents.**
 
 Skills encode the workflows, quality gates, and best practices that senior engineers use when building software. These ones are packaged so AI agents follow them consistently across every phase of development.
