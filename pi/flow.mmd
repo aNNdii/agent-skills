@@ -49,18 +49,25 @@ flowchart TD
     end
 
     subgraph S3["3 · BUILD · runs without you"]
-        wt["Worktree of the spec's branch<br/>found anywhere, else created in<br/>parent/.worktrees/repo/topic<br/>baseline green?"]
+        wt["Worktree of the spec's branch<br/>found anywhere, else created in<br/>parent/.worktrees/repo/topic<br/>baseline green? (only while no task is done)"]
         task["Task Tn: fresh subagent<br/>RED → GREEN → verify"]
-        gate{"Gate:<br/>tests green?"}
-        cp["Checkpoint commit [Tn]<br/>unsigned"]
+        gate{"Gate:<br/>Verify per task green?"}
+        cp["Checkpoint commit [Tn] unsigned<br/>or git add -A + staged tree (Commits: none)<br/>+ line in build-progress"]
         retry["1 retry"]
         block{{"STOP<br/>blocker"}}:::stop
         more{"more<br/>tasks?"}
+        final{"Final verify:<br/>every command green?"}
+        fix["1 fix agent<br/>then Final verify again"]
+        built["[final] commit or git add -A<br/>Status: built"]
         wt --> task --> gate
         gate -->|yes| cp --> more
         gate -->|no| retry --> gate
         retry -.->|"red again"| block
         more -->|yes| task
+        more -->|no| final
+        final -->|yes| built
+        final -->|no| fix -->|green| built
+        fix -.->|"red again"| block
     end
 
     subgraph S4["4 · REVIEW"]
@@ -69,12 +76,14 @@ flowchart TD
             r2["security-auditor"]
             r3["test-engineer"]
         end
+        evidence["Evidence: diff + Final verify"]
         verify["Orchestrator verifies<br/>every finding itself"]
         verdict[/"review.md<br/>Act on · Consider · Noted · Dismissed<br/>+ acceptance table"/]:::file
         stop3{{"STOP<br/>pick numbers"}}:::stop
-        fixes["Fixes as checkpoints [review-n]"]
-        squash["Squash → one signed commit"]
+        fixes["Fixes as checkpoints [review-n]<br/>or staged, each after a green Final verify"]
+        squash["Squash → one signed commit<br/>Commits: none → commit or leave staged<br/>after a commit: rebase, Final verify again"]
         stop4{{"STOP<br/>merge / push / keep"}}:::stop
+        evidence --> r1 & r2 & r3
         r1 & r2 & r3 --> verify
         verify --> verdict --> stop3 --> fixes --> squash --> stop4
     end
@@ -82,7 +91,7 @@ flowchart TD
     start --> recon
     stop1 -->|approved| ground
     stop2 -->|approved| wt
-    more -->|no| r1 & r2 & r3
+    built --> evidence
 
     classDef stop fill:#f9d5d3,stroke:#c0392b,stroke-width:2px,color:#000
     classDef file fill:#fff3c4,stroke:#b8860b,color:#000

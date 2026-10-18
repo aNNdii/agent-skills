@@ -55,8 +55,10 @@ Signatures as code, bodies `not implemented`.
 (Decided by: user, consensus, or recommendation (unconfirmed))
 
 ## Execution
-- Verify: `<full test command, with a terse reporter>`
+- Verify per task: `<fast, hermetic test command, with a terse reporter>`
+- Final verify: `<cmd>`, `<cmd>`   (every command in its own backticks; the full CI selection plus slow lanes)
 - Branch: <branch> · Base: <base>   (the spec's `Branch:` line, copied verbatim per `worktrees.md#spec-header`)
+- Commits: checkpoints | none   (default checkpoints; none builds without commits and leaves the result staged)
 - Workstreams: one | <name: tasks, files> (only for disjoint files)
 
 ## Tasks
@@ -65,6 +67,7 @@ Signatures as code, bodies `not implemented`.
 - Files: ...
 - Depends on: —
 - Hard: yes   (only for subtle logic; gets more reasoning)
+- Verify: `<cmd>`   (optional; replaces Verify per task for this task and must cover its new tests)
 
 ## Coverage
 AC1 → T1, T3 · AC2 → T2
@@ -72,8 +75,21 @@ AC1 → T1, T3 · AC2 → T2
 ## Risks
 ```
 
+There is no worktree line: `worktrees.md#locate-for-build` finds the worktree of `<branch>` wherever it is.
+
+Verify commands (Verify per task, Final verify, and a task's `Verify:`):
+- No pipe, no `||`, no `;`, no lone `&`, no line break and no backslash outside quotes. `--pattern='a|b'`, `&&` and `2>&1` are fine. The build gate chains its own steps (staging, the progress line) after the command with `&&`, so `a || b` would stage and record progress even when `a` is red. The build workflow rejects such commands.
+- The exit code comes from the test runner itself. Nothing after it may swallow a failure.
+- Use the runner's quiet or terse reporter flags so a failure fits in a short output.
+- Select tests the way CI does. If CI runs one process per file, so does the command.
+- A path filter must already match on the base and must pick up the new test files the tasks add. Check it against the base before you write it down.
+- Task gates are hermetic: no network, no downloads, no services to start. Agents may not install tools or browsers.
+- Browser, integration, and E2E lanes go only into Final verify, never into Verify per task or a task's `Verify:`.
+- A gate that runs longer than 10 minutes is aborted and counts as red. Long lanes go into Final verify.
+- `Commits: none` requires `Workstreams: one`.
+
 Task rules:
-- Vertical slices: one complete path per task, not layers. Each task ends in a passing test and one commit.
+- Vertical slices: one complete path per task, not layers. Each task ends in a passing test and one checkpoint (a commit, or with `Commits: none` the staged state).
 - At most about five files per task. Order by dependency.
 - Every acceptance criterion is covered by at least one task (the coverage line).
 - Use more than one workstream only when the file sets are disjoint and no task depends across workstreams. Otherwise use one workstream.

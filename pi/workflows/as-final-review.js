@@ -3,8 +3,11 @@
  * agents/ read the finished branch diff in parallel. The calling skill
  * (as-review) verifies and merges them per pi/references/panel-synthesis.md.
  *
- * args: { worktree, base, specPath, planPath, tiers?: { high?, mid?, low? }, personas?: string[] }
+ * args: { worktree, base, specPath, planPath, tiers?: { high?, mid?, low? },
+ *   commits?: 'checkpoints' | 'none', personas?: string[] }
  * tiers maps each tier to an exact "<provider>/<id>"; see pi/references/model-tiers.md.
+ * commits: 'checkpoints' (default) reviews `diff <base>...HEAD` and the log;
+ * 'none' reviews the staged result, `diff --cached $(merge-base HEAD <base>)`.
  */
 export const meta = {
   name: 'as-final-review',
@@ -61,6 +64,10 @@ const { worktree, base, specPath, planPath } = args ?? {}
 if (!worktree || !base || !specPath || !planPath)
   throw new Error('as-final-review needs args.worktree, args.base, args.specPath and args.planPath')
 
+const commits = args?.commits ?? 'checkpoints'
+if (commits !== 'checkpoints' && commits !== 'none')
+  throw new Error(`as-final-review: args.commits must be 'checkpoints' or 'none', got ${JSON.stringify(commits)}`)
+
 const personas = args?.personas ?? ['code-reviewer', 'security-auditor', 'test-engineer']
 const role = resolveRoles(ROLES)
 
@@ -107,7 +114,9 @@ const prompt = persona =>
     `You are the ${persona} on the final review of a finished feature branch. Use the review framework from your instructions.`,
     '',
     `Worktree: ${worktree}`,
-    `Change: \`git -C '${worktree}' diff ${base}...HEAD\` (start with --stat), commits: \`git -C '${worktree}' log --oneline ${base}..HEAD\`.`,
+    commits === 'none'
+      ? `Change (staged, not committed): \`git -C '${worktree}' diff --cached $(git -C '${worktree}' merge-base HEAD ${base})\` (start with --stat).`
+      : `Change: \`git -C '${worktree}' diff ${base}...HEAD\` (start with --stat), commits: \`git -C '${worktree}' log --oneline ${base}..HEAD\`.`,
     `Spec with acceptance criteria: ${specPath}`,
     `Plan with the intended design: ${planPath}`,
     '',
