@@ -9,8 +9,9 @@
  * args: {
  *   specPath, planPath, verify,
  *   workstreams: [{ name, worktree, branch, tasks: [{ id, title, hard? }] }],
- *   model?
+ *   tiers?: { high?, mid?, low? }
  * }
+ * tiers maps each tier to an exact "<provider>/<id>"; see pi/references/model-tiers.md.
  */
 export const meta = {
   name: 'as-build',
@@ -18,11 +19,60 @@ export const meta = {
   phases: [{ title: 'Build' }],
 }
 
+const ROLES = {
+  implement: { tier: 'mid', effort: 'medium' },
+  'implement-hard': { tier: 'high', effort: 'high' },
+  retry: { tier: 'above', effort: 'high' }, // one tier above the first attempt, capped at high
+}
+
+// --- tiers: shared block. Keep byte-identical in all pi/workflows/*.js; pi/scripts/pi-workflows-test.js fails on drift. See pi/references/model-tiers.md ---
+function resolveRoles(roles) {
+  const name = meta.name
+  if (args?.model != null || args?.effort != null) {
+    throw new Error(`${name} no longer takes args.model or args.effort; pass args.tiers { high?, mid?, low? } with exact "<provider>/<id>" values instead`)
+  }
+  const TIERS = ['high', 'mid', 'low']
+  const UP = { low: 'mid', mid: 'high', high: 'high' }
+  const given = args?.tiers
+  if (given != null) {
+    if (typeof given !== 'object' || Array.isArray(given)) {
+      throw new Error(`${name} needs args.tiers as an object { high?, mid?, low? }, got ${JSON.stringify(given)}`)
+    }
+    for (const [key, value] of Object.entries(given)) {
+      if (!TIERS.includes(key)) throw new Error(`${name}: args.tiers.${key} is not a tier; use high, mid or low`)
+      if (typeof value !== 'string' || !/^[^/]+\/.+$/.test(value)) {
+        throw new Error(`${name} needs args.tiers.${key} as "<provider>/<id>", got ${JSON.stringify(value)}`)
+      }
+    }
+  }
+  const t = given ?? {}
+  const models = { high: t.high, mid: t.mid ?? t.high, low: t.low ?? t.mid ?? t.high }
+  const from = { high: null, mid: t.mid === undefined ? 'high' : null, low: t.low === undefined ? 'mid' : null }
+  const show = k =>
+    models[k] === undefined ? `${k}=inherit` : `${k}=${models[k]}${from[k] ? ` (from ${from[k]})` : ''}`
+  log(given == null ? 'tiers: none passed, agents inherit the model of their agent type (Explore) or else the session model' : `tiers: ${TIERS.map(show).join(', ')}`)
+  return (role, after) => {
+    if (!Object.hasOwn(roles, role)) throw new Error(`${name}: unknown role "${role}"`)
+    const row = roles[role]
+    let tier = row.tier
+    if (tier === 'above') {
+      if (!Object.hasOwn(roles, after) || roles[after].tier === 'above') {
+        throw new Error(`${name}: role "${role}" needs a base role with a fixed tier, got ${JSON.stringify(after)}`)
+      }
+      tier = UP[roles[after].tier]
+    } else if (after !== undefined) {
+      throw new Error(`${name}: role "${role}" has a fixed tier and takes no base role`)
+    }
+    return models[tier] === undefined ? { effort: row.effort } : { model: models[tier], effort: row.effort }
+  }
+}
+// --- end tiers ---
+
 const { specPath, planPath, verify, workstreams } = args ?? {}
 if (!specPath || !planPath || !verify || !Array.isArray(workstreams) || workstreams.length === 0)
   throw new Error('as-build needs args.specPath, args.planPath, args.verify and a non-empty args.workstreams')
 
-const model = args?.model // omitted: inherit the lead's model
+const role = resolveRoles(ROLES)
 
 const sh = s => `'${String(s).replace(/'/g, `'\\''`)}'`
 
@@ -82,11 +132,12 @@ async function runStream(ws) {
   const gate = `cd ${sh(ws.worktree)} && ${verify}`
 
   for (const task of ws.tasks) {
-    const base = { phase: 'Build', model, gate, schema: RESULT }
+    const base = { phase: 'Build', gate, schema: RESULT }
+    const first = task.hard ? 'implement-hard' : 'implement'
     let r = await agent(taskPrompt(ws, task, notes, false), {
       ...base,
       label: `${ws.name}:${task.id}`,
-      effort: task.hard ? 'high' : 'medium',
+      ...role(first),
     })
 
     if (r === null) {
@@ -94,7 +145,7 @@ async function runStream(ws) {
       r = await agent(taskPrompt(ws, task, notes, true), {
         ...base,
         label: `${ws.name}:${task.id}:retry`,
-        effort: 'high',
+        ...role('retry', first),
       })
     }
 

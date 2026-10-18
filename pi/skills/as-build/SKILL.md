@@ -23,11 +23,12 @@ On any stop, report per `worktrees.md#stops-and-recovery` and end your turn.
 
 ## 2. Run
 
-Call `SubagentWorkflow` with `name: "as-build"` and these args:
+Resolve `tiers` per `../../references/model-tiers.md` and add it to `args` (leave it out if nothing resolves). Call `SubagentWorkflow` with `name: "as-build"` and these args:
 
 ```json
 {
   "specPath": "<abs>", "planPath": "<abs>", "verify": "<verify command from the plan>",
+  "tiers": { "high": "<provider>/<id>", "mid": "<provider>/<id>", "low": "<provider>/<id>" },
   "workstreams": [{ "name": "main", "worktree": "<wt>", "branch": "<branch>",
                     "tasks": [{ "id": "T1", "title": "...", "hard": false }] }]
 }
