@@ -36,6 +36,8 @@ const ARGS = {
     specPath: '/tmp/spec.md',
     planPath: '/tmp/plan.md',
     verify: 'true',
+    finalVerify: ['true'],
+    progressPath: '/tmp/build-progress',
     workstreams: [{
       name: 'ws',
       worktree: '/tmp/wt',
@@ -392,7 +394,8 @@ for (const [tiers, models] of [[FULL, FULL], [{ mid: 'p/mid' }, { mid: 'p/mid', 
       assert.equal(call.opts.model, models[tier], `${call.label}: model`);
       assert.equal(call.opts.effort, effort, `${call.label}: effort`);
       assert.equal(call.opts.phase, 'Build');
-      assert.equal(call.opts.gate, "cd '/tmp/wt' && true");
+      const id = call.label.split(':')[1];
+      assert.equal(call.opts.gate, `cd '/tmp/wt' && true && printf '%s\\n' 'ws:${id}' >> '/tmp/build-progress'`);
     }
     assert.deepEqual(result.results[0].done.map(d => d.id), ['T1', 'T2']);
   });

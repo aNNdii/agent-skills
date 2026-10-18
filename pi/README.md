@@ -90,18 +90,25 @@ flowchart TD
     end
 
     subgraph S3["3 · BUILD · runs without you"]
-        wt["Worktree of the spec's branch<br/>found anywhere, else created in<br/>parent/.worktrees/repo/topic<br/>baseline green?"]
+        wt["Worktree of the spec's branch<br/>found anywhere, else created in<br/>parent/.worktrees/repo/topic<br/>baseline green? (only while no task is done)"]
         task["Task Tn: fresh subagent<br/>RED → GREEN → verify"]
-        gate{"Gate:<br/>tests green?"}
-        cp["Checkpoint commit [Tn]<br/>unsigned"]
+        gate{"Gate:<br/>Verify per task green?"}
+        cp["Checkpoint commit [Tn] unsigned<br/>or git add -A + staged tree (Commits: none)<br/>+ line in build-progress"]
         retry["1 retry"]
         block{{"STOP<br/>blocker"}}:::stop
         more{"more<br/>tasks?"}
+        final{"Final verify:<br/>every command green?"}
+        fix["1 fix agent<br/>then Final verify again"]
+        built["[final] commit or git add -A<br/>Status: built"]
         wt --> task --> gate
         gate -->|yes| cp --> more
         gate -->|no| retry --> gate
         retry -.->|"red again"| block
         more -->|yes| task
+        more -->|no| final
+        final -->|yes| built
+        final -->|no| fix -->|green| built
+        fix -.->|"red again"| block
     end
 
     subgraph S4["4 · REVIEW"]
@@ -110,12 +117,14 @@ flowchart TD
             r2["security-auditor"]
             r3["test-engineer"]
         end
+        evidence["Evidence: diff + Final verify"]
         verify["Orchestrator verifies<br/>every finding itself"]
         verdict[/"review.md<br/>Act on · Consider · Noted · Dismissed<br/>+ acceptance table"/]:::file
         stop3{{"STOP<br/>pick numbers"}}:::stop
-        fixes["Fixes as checkpoints [review-n]"]
-        squash["Squash → one signed commit"]
+        fixes["Fixes as checkpoints [review-n]<br/>or staged, each after a green Final verify"]
+        squash["Squash → one signed commit<br/>Commits: none → commit or leave staged<br/>after a commit: rebase, Final verify again"]
         stop4{{"STOP<br/>merge / push / keep"}}:::stop
+        evidence --> r1 & r2 & r3
         r1 & r2 & r3 --> verify
         verify --> verdict --> stop3 --> fixes --> squash --> stop4
     end
@@ -123,7 +132,7 @@ flowchart TD
     start --> recon
     stop1 -->|approved| ground
     stop2 -->|approved| wt
-    more -->|no| r1 & r2 & r3
+    built --> evidence
 
     classDef stop fill:#f9d5d3,stroke:#c0392b,stroke-width:2px,color:#000
     classDef file fill:#fff3c4,stroke:#b8860b,color:#000
@@ -135,8 +144,8 @@ flowchart TD
 |---|---|---|
 | `/spec <request>` | Recon, then a start check of the git state (a note, or the question whether to work in a new worktree now), then intent questions one at a time if the goal is unclear ("one by one" forces it), then detail rounds with recommendations, one-page spec, three-lens spec review | yes |
 | `/plan [spec]` | Design arena: grounding, 2-3 competing designs (minimal, domain, caller), cross-judge, graft. Then the task plan | yes |
-| `/build [plan]` | Worktree on the spec's branch: reuses it wherever it lives, else creates `<wtroot>/<topic>`. Never builds in the main checkout. One fresh subagent per task, verify command as gate, one commit per task. No per-task review | only on blockers |
-| `/review [plan]` | code-reviewer, security-auditor, test-engineer in parallel on the branch diff. Verified, merged verdict | yes, applies nothing |
+| `/build [plan]` | Worktree on the spec's branch: reuses it wherever it lives, else creates `<wtroot>/<topic>`. Never builds in the main checkout. Two verify levels: `Verify per task` gates each task (one fresh subagent per task), `Final verify` runs every command once at the end, with one fix agent if red. One checkpoint commit per task, or with `Commits: none` the result stays staged. Resumes from `build-progress`. No per-task review | only on blockers |
+| `/review [plan]` | Final verify, then code-reviewer, security-auditor, test-engineer in parallel on the branch diff (the staged diff with `Commits: none`). Verified, merged verdict. Fixes are taken only when Final verify is green; the finish squashes into one signed commit, or with `Commits: none` commits or leaves the result staged | yes, applies nothing |
 | `/flow [request]` | Detects the phase from `.specs/` and git and runs the next one. Same stops as above | per phase |
 
 ### `.specs/` and worktrees

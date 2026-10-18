@@ -21,8 +21,9 @@ One entry point for the four phases. The state lives in files, not in this conve
 | Spec `approved`, no `plan.md`, no `arena.md` | **as-plan** |
 | `arena.md` exists, no `plan.md` | **as-plan** from step 3: present the design decision from `arena.md` |
 | `plan.md` has `Status: draft` | **as-plan**, continue: show the unconfirmed decisions and ask for approval |
-| Plan `approved` | **as-build** (it resumes at the first task without a `[T<n>]` commit) |
-| Plan `built` | **as-review** |
+| Plan `approved` | **as-build** (it resumes at the first task without a line in `<spec dir>/build-progress`, or, while that file is missing, without a `[T<n>]` commit; with no open task left it goes straight to the Final verify) |
+| Plan `built` | **as-review** (`built` means the Final verify was green) |
+| Plan `reviewed` with the note `staged, not committed` | **as-review** from step 5: offer again to commit the staged result or leave it staged |
 | Plan `reviewed` | **as-review** from step 4: open fixes, or the finish when the user says done |
 | Plan `done` | Report that it is done, with the branch or merge state |
 

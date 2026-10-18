@@ -88,7 +88,7 @@ Choices: `carry` (3a), `leave` (3b), `abort` (3c), `now` (4a, 5a), `later` (4b, 
 
 Input: `<topic>`, `<branch>`, `<base>`. Excludes has run, and Resume or collision returned `new` (or Locate for build called this section). Result: the absolute worktree path.
 
-1. `git -C <main> worktree add <wtroot>/<topic> -b <branch> <base>`. Git creates missing parent dirs itself. If `<branch>` exists already (`git -C <main> show-ref --verify --quiet refs/heads/<branch>` succeeds), check it out instead of creating it: `git -C <main> worktree add <wtroot>/<topic> <branch>`.
+1. `git -C <main> worktree add --no-track -b <branch> <wtroot>/<topic> <base>`. Git creates missing parent dirs itself. `--no-track` keeps `<branch>` from taking `<base>` as its upstream. If `<branch>` exists already (`git -C <main> show-ref --verify --quiet refs/heads/<branch>` succeeds), check it out instead of creating it: `git -C <main> worktree add <wtroot>/<topic> <branch>`.
 2. If it fails because `<wtroot>` cannot be created or written, stop (Stops and recovery). Never fall back to another path. Git may have created `<branch>` before it failed: check with `show-ref` as in step 1 and name it in the report. A rerun of this step then takes the existing-branch variant of step 1.
 3. Tell the user: "Worktree: `<wtroot>/<topic>` on `<branch>`." Every later step uses that absolute path.
 
@@ -159,7 +159,7 @@ Input: `<wt>` and `<branch>` from Locate for build, after the build step of Carr
 
 1. Each name is ASCII lowercase kebab-case. `<start>` is the current HEAD of `<branch>`, after `[wip]`: `git -C <wt> rev-parse HEAD`.
 2. Per name: if `git -C <main> worktree list --porcelain` has an entry on `refs/heads/<branch>-<name>`, reuse it (resume). Else run Create with the topic `<topic>-<name>`, the branch `<branch>-<name>` and the base `<start>`.
-3. After the build, merge back inside `<wt>`, one workstream at a time: `git -C <wt> -c commit.gpgsign=false merge --no-edit <branch>-<name>`, then run verify in `<wt>`. On a conflict or a red verify, stop.
+3. After the build, merge back inside `<wt>`, one workstream at a time: `git -C <wt> -c commit.gpgsign=false merge --no-edit <branch>-<name>`, then run the plan's `Verify per task` in `<wt>`. On a conflict or a red `Verify per task`, stop.
 
 ## Stops and recovery
 
@@ -176,7 +176,7 @@ On a stop, report the state and the options below, then end your turn. Never dro
 | `<branch>` in the plan is protected | the branch | correct `Execution` in the plan / abort. Never build on it |
 | The user aborts the case 3 or switch question, or `git -C <main> switch` fails | git's error, if any | nothing was changed: commit or stash in `<main>` by hand and run /build again / abort |
 | Uncommitted changes in `<wt>` that are not carried changes, or `[wip]` exists already | `git -C <wt> status --porcelain` | commit them in `<wt>` as an unsigned checkpoint / stash them in `<wt>` / abort |
-| Merge of `<branch>-<name>` conflicts, or verify is red after it | the conflicting files or the verify output | resolve in `<wt>` and run verify / `git -C <wt> merge --abort` and fix the workstream / abort |
+| Merge of `<branch>-<name>` conflicts, or `Verify per task` is red after it | the conflicting files or the verify output | resolve in `<wt>` and run `Verify per task` / `git -C <wt> merge --abort` and fix the workstream / abort |
 
 ## Parent requirements
 
