@@ -5,7 +5,7 @@ description: Phase 4 of the /spec → /plan → /build → /review flow. Use onl
 
 # Review
 
-Input: a built plan. Find it per `../../references/worktrees.md#find-the-work-item`: the path or topic from the request, else the newest plan with `Status: built`. `<branch>` and `<base>` come only from the plan's `Execution` line `Branch: <branch> · Base: <base>`. Never derive the base from the current branch. If the line is missing or a value is empty, stop and ask for both. If `<branch>` is protected (`../../references/worktrees.md#terms`), stop. The worktree `<wt>` is the entry on `refs/heads/<branch>` in `git worktree list --porcelain`. If there is no such entry, or its path is `<main>`, stop and say so: review, fixes and the squash never run in the main checkout. Offer to recreate the worktree per `../../references/worktrees.md#create` (after switching `<main>` away from `<branch>` per `../../references/worktrees.md#locate-for-build`). Run every git command below with `git -C <wt>`.
+Input: a built plan. Find it per `../../references/worktrees.md#find-the-work-item`: the path or topic from the request, else the newest plan with `Status: built`. `<branch>` and `<base>` come only from the plan's `Execution` line `Branch: <branch> · Base: <base>`. Never derive the base from the current branch. If the line is missing or a value is empty, stop and ask for both. If `<branch>` is protected (`../../references/worktrees.md#terms`), stop. The worktree `<wt>` is the worktree of `<branch>` (`../../references/worktrees.md#terms`). If there is none, or its path is `<main>`, stop and say so: review, fixes and the squash never run in the main checkout. Offer to recreate the worktree per `../../references/worktrees.md#create` (after switching `<main>` away from `<branch>` per `../../references/worktrees.md#locate-for-build`). Run every git command below with `git -C <wt>`.
 
 Language rules: `../../references/language.md`.
 
@@ -38,19 +38,19 @@ The user picks numbers. Fix those in the worktree one at a time. After each fix,
 
 ## 5. Finish
 
-When the user says done, turn the result into one commit in `<wt>`. Write the message from spec and plan: a conventional subject line, three to five lines of what changed for callers, and a last line such as `Spec: AC1-AC4 · Tasks: T1-T3 · Review fixes: 2`. Commit messages are always English and signed per the user's git config.
+When the user says done, turn the result into one commit in `<wt>`. Write the message from spec and plan: a conventional subject line, three to five lines of what changed for callers, and a last line such as `Spec: AC1-AC4 · Tasks: T1-T3 · Review fixes: 2`. Commit messages are always English and signed per the user's git config. First get `<onto>` per `../../references/worktrees.md#squash-base`.
 
-Mode `checkpoints`: squash all commits since `<base>` (the `[wip]` commit of carried changes, the `[T<n>]`, `[final]` and `[review-<n>]` checkpoints):
+Mode `checkpoints`: squash all commits since `<onto>` (the `[wip]` commit of carried changes, the `[T<n>]`, `[final]` and `[review-<n>]` checkpoints). If Squash base returns `no squash`, skip steps 1-3.
 
 1. Backup: if `git -C <wt> rev-parse --verify --quiet refs/heads/<branch>-checkpoints` finds the branch, stop and ask; never use `-f`. Otherwise `git -C <wt> branch <branch>-checkpoints`.
-2. `git -C <wt> reset --soft $(git -C <wt> merge-base HEAD <base>)`, then `git -C <wt> commit -F <message>`.
-3. Check `git -C <wt> diff --quiet <branch>-checkpoints HEAD` and that `git -C <wt> log --oneline <base>..HEAD` shows exactly one commit. On a failure, stop and report; the backup holds the history.
+2. `git -C <wt> reset --soft <onto>`, then `git -C <wt> commit -F <message>`.
+3. Check `git -C <wt> diff --quiet <branch>-checkpoints HEAD` and that `git -C <wt> log --oneline <onto>..HEAD` shows exactly one commit. On a failure, stop and report; the backup holds the history.
 4. `git -C <wt> rebase <base>`. On a conflict, note the files from `git -C <wt> diff --name-only --diff-filter=U`, run `git -C <wt> rebase --abort`, report the files, and end your turn.
 5. Run Final verify again as in §1. Red: report each red command with its output and end your turn.
 
 Mode `none`: ask whether to (a) commit the staged result or (b) leave it staged. Propose (a).
 
-- (a) Record the verified index with `tree=$(git -C <wt> write-tree)`, then run step 2 (the soft reset folds a `[wip]` commit of carried changes in and keeps the index). Step 3 checks `git -C <wt> diff --quiet $tree HEAD` instead of the backup comparison, plus exactly one commit. Then go on with steps 4 and 5, and drop the note "staged, not committed" from the plan if it has one.
+- (a) Record the verified index with `tree=$(git -C <wt> write-tree)`, then run step 2 (the soft reset folds a `[wip]` commit of carried changes in and keeps the index; for `no squash`, `<onto>` is HEAD). Step 3 checks `git -C <wt> diff --quiet $tree HEAD` instead of the backup comparison, plus exactly one commit. Then go on with steps 4 and 5, and drop the note "staged, not committed" from the plan if it has one.
 - (b) No commit, no rebase, no cleanup. The plan stays `Status: reviewed <date>` with the note: `Status: reviewed <date> · staged, not committed`. End your turn. `/flow` offers §5 again later.
 
-After step 5, offer: fast-forward the base locally, push the branch for a merge request, or keep it. After the merge, ask before removing anything. Only on a yes, remove `<wt>` (`git worktree remove <wt>`), the checkpoint branch `<branch>-checkpoints` if there is one, and any workstream worktrees and branches `<branch>-<name>`. Removing `<branch>` itself needs its own yes. Set the plan to `Status: done <date>` with the commit or merge request. Never push without being asked.
+After step 5, offer: fast-forward the base locally, push the branch for a merge request, or keep it. After the merge, ask before removing anything. If `<wt>` is a flow-owned worktree (`../../references/worktrees.md#terms`): only on a yes, remove `<wt>` (`git worktree remove <wt>`), the checkpoint branch `<branch>-checkpoints` if there is one, and any workstream worktrees and branches `<branch>-<name>`. Removing `<branch>` itself needs its own yes. Otherwise offer only to remove `<branch>-checkpoints` if there is one, and say: "`<wt>` was not created by the flow: managing it is up to you." Set the plan to `Status: done <date>` with the commit or merge request. Never push without being asked.

@@ -44,7 +44,7 @@ flowchart TD
 
     subgraph S1["1 · SPEC"]
         recon["Recon<br/>reads the code"]
-        detect["Start check: git state<br/>note, or ask: new worktree<br/>parent/.worktrees/repo/topic now?"]
+        detect["Start check: git state<br/>linked worktree: note, used as is<br/>main checkout: ask: new worktree<br/>parent/.worktrees/repo/topic now?"]
         mode{"Goal clear?"}
         intent["Clarify intent<br/>one question per message<br/>with a guess"]
         rounds["Detail rounds: understood ·<br/>assumptions · questions with recommendation"]
@@ -90,7 +90,7 @@ flowchart TD
     end
 
     subgraph S3["3 · BUILD · runs without you"]
-        wt["Worktree of the spec's branch<br/>found anywhere, else created in<br/>parent/.worktrees/repo/topic<br/>baseline green? (only while no task is done)"]
+        wt["Worktree of the spec's branch<br/>found anywhere: used as is<br/>else created in<br/>parent/.worktrees/repo/topic<br/>baseline green? (only while no task is done)"]
         task["Task Tn: fresh subagent<br/>RED → GREEN → verify"]
         gate{"Gate:<br/>Verify per task green?"}
         cp["Checkpoint commit [Tn] unsigned<br/>or git add -A + staged tree (Commits: none)<br/>+ line in build-progress"]
@@ -142,19 +142,19 @@ flowchart TD
 
 | Command | Does | Stops for you |
 |---|---|---|
-| `/spec <request>` | Recon, then a start check of the git state (a note, or the question whether to work in a new worktree now), then intent questions one at a time if the goal is unclear ("one by one" forces it), then detail rounds with recommendations, one-page spec, three-lens spec review | yes |
+| `/spec <request>` | Recon, then a start check of the git state (in a linked worktree only a note, the worktree is used as it is; in the main checkout the question whether to work in a new worktree now), then intent questions one at a time if the goal is unclear ("one by one" forces it), then detail rounds with recommendations, one-page spec, three-lens spec review | yes |
 | `/plan [spec]` | Design arena: grounding, 2-3 competing designs (minimal, domain, caller), cross-judge, graft. Then the task plan | yes |
-| `/build [plan]` | Worktree on the spec's branch: reuses it wherever it lives, else creates `<wtroot>/<topic>`. Never builds in the main checkout. Two verify levels: `Verify per task` gates each task (one fresh subagent per task), `Final verify` runs every command once at the end, with one fix agent if red. One checkpoint commit per task, or with `Commits: none` the result stays staged. Resumes from `build-progress`. No per-task review | only on blockers |
+| `/build [plan]` | Worktree on the spec's branch: reuses it as it is, wherever it lives, else creates `<wtroot>/<topic>`. A worktree the flow did not create runs all workstreams in itself, one after another. Never builds in the main checkout. Two verify levels: `Verify per task` gates each task (one fresh subagent per task), `Final verify` runs every command once at the end, with one fix agent if red. One checkpoint commit per task, or with `Commits: none` the result stays staged. Resumes from `build-progress`. No per-task review | only on blockers |
 | `/review [plan]` | Final verify, then code-reviewer, security-auditor, test-engineer in parallel on the branch diff (the staged diff with `Commits: none`). Verified, merged verdict. Fixes are taken only when Final verify is green; the finish squashes into one signed commit, or with `Commits: none` commits or leaves the result staged | yes, applies nothing |
 | `/flow [request]` | Detects the phase from `.specs/` and git and runs the next one. Same stops as above | per phase |
 
 ### `.specs/` and worktrees
 
-Spec and plan live in `<main>/.specs/<date>-<topic>/`, where `<main>` is the main checkout (the first entry of `git worktree list`). `.specs/` is excluded via `.git/info/exclude` and never committed. Every phase searches `<main>/.specs/` first, then `.specs/` of the current worktree.
+Spec and plan live in `<main>/.specs/<date>-<topic>/`, where `<main>` is the main checkout (the first entry of `git worktree list`). `.specs/` is excluded via `.git/info/exclude` and never committed. Without a path or topic, every phase in a linked worktree first takes the newest open item whose `Branch:` line is that worktree's branch. Otherwise it searches `<main>/.specs/` first, then `.specs/` of the current worktree. See [Find the work item](references/worktrees.md#find-the-work-item).
 
 Feature work happens in a git worktree from the start. Worktrees live in `<wtroot>/<topic>` on `feat/<topic>` (or `fix/<topic>`), where `<wtroot>` is `<parent>/.worktrees/<repo>`: `/workspace/agent-skills` gets `/workspace/.worktrees/agent-skills/<topic>`. Nothing is nested inside the repo, so tools do not scan a second checkout.
 
-After recon, `/spec` checks the git state. In a linked worktree on a feature branch it only notes where it works. In the main checkout, on a protected branch, or on a detached HEAD, it asks whether to create the worktree now (carrying the changes along, if you want) or at `/build`. The spec records `Branch:` and `Base:`, and `/plan`, `/build` and `/review` take both from there.
+An existing linked worktree is used as it is, whatever its path, who created it, its branch, a detached HEAD, or its changes. After recon, `/spec` then only notes where it works, and on a protected branch or a detached HEAD that `/build` cannot commit there. The spec records `Worktree: linked`. The worktree rules and questions apply only from the main checkout: there `/spec` asks whether to create the worktree now (carrying the changes along, if you want) or at `/build`. The spec records `Branch:` and `Base:`, and `/plan`, `/build` and `/review` take both from there.
 
 The repo's parent dir must be writable and persistent. Otherwise worktree creation stops with the path and the error. Deleting a repo leaves its `<wtroot>` behind: remove that orphaned dir by hand. All rules, questions and recovery steps are in [`pi/references/worktrees.md`](references/worktrees.md), see [Parent requirements](references/worktrees.md#parent-requirements).
 

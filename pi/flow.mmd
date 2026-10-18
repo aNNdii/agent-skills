@@ -3,7 +3,7 @@ flowchart TD
 
     subgraph S1["1 · SPEC"]
         recon["Recon<br/>reads the code"]
-        detect["Start check: git state<br/>note, or ask: new worktree<br/>parent/.worktrees/repo/topic now?"]
+        detect["Start check: git state<br/>linked worktree: note, used as is<br/>main checkout: ask: new worktree<br/>parent/.worktrees/repo/topic now?"]
         mode{"Goal clear?"}
         intent["Clarify intent<br/>one question per message<br/>with a guess"]
         rounds["Detail rounds: understood ·<br/>assumptions · questions with recommendation"]
@@ -49,7 +49,7 @@ flowchart TD
     end
 
     subgraph S3["3 · BUILD · runs without you"]
-        wt["Worktree of the spec's branch<br/>found anywhere, else created in<br/>parent/.worktrees/repo/topic<br/>baseline green? (only while no task is done)"]
+        wt["Worktree of the spec's branch<br/>found anywhere: used as is<br/>else created in<br/>parent/.worktrees/repo/topic<br/>baseline green? (only while no task is done)"]
         task["Task Tn: fresh subagent<br/>RED → GREEN → verify"]
         gate{"Gate:<br/>Verify per task green?"}
         cp["Checkpoint commit [Tn] unsigned<br/>or git add -A + staged tree (Commits: none)<br/>+ line in build-progress"]
