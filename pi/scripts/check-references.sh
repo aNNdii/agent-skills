@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Verify command for pi/. Keeps the worktree rules in pi/references/worktrees.md,
-# the README diagram in sync with pi/flow.mmd, and the fork boundaries (only pi/ changes).
+# the README diagram in sync with pi/flow.mmd, the fork boundaries (only pi/ changes), and runs
+# the tests in pi/scripts/ (among them the drift check of the tiers block in pi/workflows/*.js).
 # Usage: bash pi/scripts/check-references.sh <base>
 set -uo pipefail
 
@@ -48,6 +49,9 @@ outside=$( { git diff --name-only "$mb" -- . ':!pi'; git ls-files --others --exc
 [ -z "$outside" ] || err "e) files outside pi/ changed since $base: $(echo $outside)"
 # The bracket keeps this line from matching itself.
 if grep -rIqi 'herd[r]' pi; then err "e) pi/ mentions herd""r"; fi
+
+# f) The tests in pi/scripts/ pass. They live inside pi/, so nothing outside pi/ runs them.
+node --test --test-reporter=dot pi/scripts/*-test.js >/dev/null || err "f) tests in pi/scripts/ fail, run: node --test pi/scripts/*-test.js"
 
 [ "$fail" -eq 0 ] && echo "check-references: ok"
 exit "$fail"

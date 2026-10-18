@@ -8,7 +8,7 @@ flowchart TD
         intent["Clarify intent<br/>one question per message<br/>with a guess"]
         rounds["Detail rounds: understood ·<br/>assumptions · questions with recommendation"]
         specmd[/"main/.specs/date-topic/spec.md<br/>Branch · Base · max. one page"/]:::file
-        subgraph SR["Spec review · Opus medium · parallel"]
+        subgraph SR["Spec review · high/high · parallel"]
             l1["Builder"]
             l2["Edge cases"]
             l3["Scope"]
@@ -29,7 +29,7 @@ flowchart TD
 
     subgraph S2["2 · PLAN"]
         ground["Explorer<br/>grounding"]
-        subgraph AR["Design arena · Opus high · parallel"]
+        subgraph AR["Design arena · high/high · parallel"]
             d1["minimal"]
             d2["domain"]
             d3["caller"]
@@ -64,7 +64,7 @@ flowchart TD
     end
 
     subgraph S4["4 · REVIEW"]
-        subgraph RV["Reviewer · Opus high · parallel"]
+        subgraph RV["Reviewer · high/high · parallel"]
             r1["code-reviewer"]
             r2["security-auditor"]
             r3["test-engineer"]

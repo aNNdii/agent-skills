@@ -49,7 +49,7 @@ flowchart TD
         intent["Clarify intent<br/>one question per message<br/>with a guess"]
         rounds["Detail rounds: understood ·<br/>assumptions · questions with recommendation"]
         specmd[/"main/.specs/date-topic/spec.md<br/>Branch · Base · max. one page"/]:::file
-        subgraph SR["Spec review · Opus medium · parallel"]
+        subgraph SR["Spec review · high/high · parallel"]
             l1["Builder"]
             l2["Edge cases"]
             l3["Scope"]
@@ -70,7 +70,7 @@ flowchart TD
 
     subgraph S2["2 · PLAN"]
         ground["Explorer<br/>grounding"]
-        subgraph AR["Design arena · Opus high · parallel"]
+        subgraph AR["Design arena · high/high · parallel"]
             d1["minimal"]
             d2["domain"]
             d3["caller"]
@@ -105,7 +105,7 @@ flowchart TD
     end
 
     subgraph S4["4 · REVIEW"]
-        subgraph RV["Reviewer · Opus high · parallel"]
+        subgraph RV["Reviewer · high/high · parallel"]
             r1["code-reviewer"]
             r2["security-auditor"]
             r3["test-engineer"]
@@ -152,8 +152,8 @@ The repo's parent dir must be writable and persistent. Otherwise worktree creati
 ## Pieces
 
 - `pi/skills/as-*`: the four phases. Invoked through `pi/prompts/*.md`.
-- `pi/workflows/*.js`: deterministic fan-outs for `SubagentWorkflow` (pi-subagents). Reviewers run on Opus. Spec review uses medium effort, design, judge, and final review use high.
-- `pi/references/`: panel synthesis (consensus, split, single, dismissed), design red flags, and language rules (talk and write specs in the user's language, keep repo text, status values, and ids in English).
+- `pi/workflows/*.js`: deterministic fan-outs for `SubagentWorkflow` (pi-subagents). Each role has a tier (`high`, `mid`, `low`) and an effort: spec review, design, judge, and final review run high/high, grounding low/medium, implementation mid/medium, hard tasks high/high, and a retry one tier above its first attempt with high effort. The lead resolves the provider's models into `args.tiers` per `pi/references/model-tiers.md`; without it, every agent inherits the session model (only the Explore grounding agent keeps its own small model).
+- `pi/references/`: model tiers (how the lead maps the provider's models to `high`, `mid`, `low`), panel synthesis (consensus, split, single, dismissed), design red flags, and language rules (talk and write specs in the user's language, keep repo text, status values, and ids in English).
 - `pi/skills/principles/`: three short pstack principles, auto-loaded when they apply.
 - `agents/`: the upstream personas, registered as pi subagents.
 

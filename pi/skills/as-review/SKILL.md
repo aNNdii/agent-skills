@@ -15,7 +15,7 @@ Run in `<wt>`: `git diff --stat <base>...HEAD`, `git log --oneline <base>..HEAD`
 
 ## 2. Panel
 
-Call `SubagentWorkflow` with `name: "as-final-review"` and `args: { worktree: <wt>, base: <base>, specPath, planPath }`. Add `"web-performance-auditor"` to `personas` when the change affects web UI or load performance. It runs in the background. Wait for the completion notification, do not poll.
+Resolve `tiers` per `../../references/model-tiers.md` and add it to `args` (leave it out if nothing resolves). Call `SubagentWorkflow` with `name: "as-final-review"` and `args: { worktree: <wt>, base: <base>, specPath, planPath, tiers }`. Add `"web-performance-auditor"` to `personas` when the change affects web UI or load performance. It runs in the background. Wait for the completion notification, do not poll.
 
 ## 3. Verify and merge
 

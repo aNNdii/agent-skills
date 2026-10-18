@@ -84,7 +84,7 @@ Affected places with paths, test command, conventions.
 
 ## 4. Spec review
 
-Call `SubagentWorkflow` with `name: "as-spec-review"` and `args: { specPath, repo }` (absolute paths). It runs in the background. Wait for the completion notification, do not poll.
+Resolve `tiers` per `../../references/model-tiers.md` and add it to `args` (leave it out if nothing resolves). Call `SubagentWorkflow` with `name: "as-spec-review"` and `args: { specPath, repo, tiers }` (absolute paths). It runs in the background. Wait for the completion notification, do not poll.
 
 Merge the result per `../../references/panel-synthesis.md`. Resolve items the spec, the code, or earlier answers already settle yourself, and fix the spec for them. Leave every real user decision open.
 

@@ -3,7 +3,8 @@
  * a concrete recommendation. The calling skill (as-spec) merges them per
  * pi/references/panel-synthesis.md.
  *
- * args: { specPath, repo, model?, effort?, lenses?: (string | {key, brief})[] }
+ * args: { specPath, repo, tiers?: { high?, mid?, low? }, lenses?: (string | {key, brief})[] }
+ * tiers maps each tier to an exact "<provider>/<id>"; see pi/references/model-tiers.md.
  */
 export const meta = {
   name: 'as-spec-review',
@@ -11,12 +12,56 @@ export const meta = {
   phases: [{ title: 'Review' }],
 }
 
+const ROLES = { 'spec-review': { tier: 'high', effort: 'high' } }
+
+// --- tiers: shared block. Keep byte-identical in all pi/workflows/*.js; pi/scripts/pi-workflows-test.js fails on drift. See pi/references/model-tiers.md ---
+function resolveRoles(roles) {
+  const name = meta.name
+  if (args?.model != null || args?.effort != null) {
+    throw new Error(`${name} no longer takes args.model or args.effort; pass args.tiers { high?, mid?, low? } with exact "<provider>/<id>" values instead`)
+  }
+  const TIERS = ['high', 'mid', 'low']
+  const UP = { low: 'mid', mid: 'high', high: 'high' }
+  const given = args?.tiers
+  if (given != null) {
+    if (typeof given !== 'object' || Array.isArray(given)) {
+      throw new Error(`${name} needs args.tiers as an object { high?, mid?, low? }, got ${JSON.stringify(given)}`)
+    }
+    for (const [key, value] of Object.entries(given)) {
+      if (!TIERS.includes(key)) throw new Error(`${name}: args.tiers.${key} is not a tier; use high, mid or low`)
+      if (typeof value !== 'string' || !/^[^/]+\/.+$/.test(value)) {
+        throw new Error(`${name} needs args.tiers.${key} as "<provider>/<id>", got ${JSON.stringify(value)}`)
+      }
+    }
+  }
+  const t = given ?? {}
+  const models = { high: t.high, mid: t.mid ?? t.high, low: t.low ?? t.mid ?? t.high }
+  const from = { high: null, mid: t.mid === undefined ? 'high' : null, low: t.low === undefined ? 'mid' : null }
+  const show = k =>
+    models[k] === undefined ? `${k}=inherit` : `${k}=${models[k]}${from[k] ? ` (from ${from[k]})` : ''}`
+  log(given == null ? 'tiers: none passed, agents inherit the model of their agent type (Explore) or else the session model' : `tiers: ${TIERS.map(show).join(', ')}`)
+  return (role, after) => {
+    if (!Object.hasOwn(roles, role)) throw new Error(`${name}: unknown role "${role}"`)
+    const row = roles[role]
+    let tier = row.tier
+    if (tier === 'above') {
+      if (!Object.hasOwn(roles, after) || roles[after].tier === 'above') {
+        throw new Error(`${name}: role "${role}" needs a base role with a fixed tier, got ${JSON.stringify(after)}`)
+      }
+      tier = UP[roles[after].tier]
+    } else if (after !== undefined) {
+      throw new Error(`${name}: role "${role}" has a fixed tier and takes no base role`)
+    }
+    return models[tier] === undefined ? { effort: row.effort } : { model: models[tier], effort: row.effort }
+  }
+}
+// --- end tiers ---
+
 const specPath = args?.specPath
 const repo = args?.repo
 if (!specPath || !repo) throw new Error('as-spec-review needs args.specPath and args.repo (absolute paths)')
 
-const model = args?.model ?? 'opus'
-const effort = args?.effort ?? 'medium'
+const role = resolveRoles(ROLES)
 
 const DEFAULT_LENSES = [
   {
@@ -96,9 +141,8 @@ const results = await parallel(
       label: `spec:${lens.key}`,
       phase: 'Review',
       agentType: 'Plan',
-      model,
-      effort,
       schema: SCHEMA,
+      ...role('spec-review'),
     }).then(r => (r ? { lens: lens.key, ...r } : null)),
   ),
 )
