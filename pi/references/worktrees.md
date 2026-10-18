@@ -31,6 +31,15 @@ Input: a spec dir path, a topic, or nothing, plus what the caller looks for (for
 5. Found only in the worktree: use it and say in one line "Using `<dir>` from this worktree's `.specs/`, not `<main>/.specs/`." Never move or copy it.
 6. Nothing found: say so and let the caller decide.
 
+## Working directory
+
+Input: the spec's `Branch:` line, or the plan's `Execution` line. Result: `<wd>`, an absolute path. `/plan` and `/spec` read the code there, because the session may run in `<main>` while the work lives in a worktree.
+
+1. Take `<branch>` from that line. If the line is missing or `<branch>` is empty, `<wd>` is `git rev-parse --show-toplevel` of the current directory. Skip the remaining steps.
+2. In `git -C <main> worktree list --porcelain`, find the entry with the line `branch refs/heads/<branch>`. Its path is `<wd>`. No entry: `<wd>` as in step 1.
+3. When `<wd>` is not the current directory's toplevel, say in one line: "Reading code in `<wd>`."
+4. Read, grep and test only under `<wd>`, with absolute paths. Pass `<wd>` as `repo` to workflows.
+
 ## Excludes
 
 Run before the first spec is written, and before any stash. Only `.specs/` is excluded. Worktrees live outside the repo and need no entry.

@@ -148,6 +148,36 @@ flowchart TD
 | `/review [plan]` | Final verify, then code-reviewer, security-auditor, test-engineer in parallel on the branch diff (the staged diff with `Commits: none`). Verified, merged verdict. Fixes are taken only when Final verify is green; the finish squashes into one signed commit, or with `Commits: none` commits or leaves the result staged | yes, applies nothing |
 | `/flow [request]` | Detects the phase from `.specs/` and git and runs the next one. Same stops as above | per phase |
 
+### Fresh session per phase
+
+The flow state lives in `.specs/` and git, so each phase can start without the chat before it. The extension `pi/extensions/flow-fresh-context.ts` registers `/spec`, `/plan`, `/build`, `/review` and `/flow`. When the current session already has history, the command opens a fresh session, names it `/<command> <args>` and sends the phase prompt there. The old session stays available through `/resume`. Nothing is carried over except the prompt, and the fresh session keeps the current working directory.
+
+Each call decides in this order:
+
+1. Not in the interactive TUI (`pi -p`, JSON or RPC mode): run in the current session. Print mode waits for the turn, so its output appears.
+2. The current branch has nothing that reaches the model (no message, custom message, branch summary or compaction): run in the current session, without asking. Model changes, labels and other custom entries do not count.
+3. The setting for the phase: `false` runs in the current session, `true` starts a fresh one, `"ask"` shows "Fresh session" (preselected) or "Continue here". Escape cancels and sends nothing. `/flow` without arguments treats `"ask"` as `true`, since there is no new request in the chat to keep.
+4. In the current session, a busy agent gets the prompt as a follow-up after its turn, as with the plain prompt template.
+5. A fresh session while the agent is busy only warns "Agent is busy, run /<command> again when it is done." This check runs before the dialog.
+
+Settings live in `<agentDir>/as-flow.json`, where `<agentDir>` is `PI_CODING_AGENT_DIR` or `~/.pi/agent`. Values are `true`, `false` or `"ask"`. These are the defaults:
+
+```json
+{
+  "freshSession": { "spec": "ask", "plan": true, "build": true, "review": true, "flow": "ask" }
+}
+```
+
+Missing keys keep their default. The file is read on every call, so changes need no `/reload`. A broken file shows a warning starting with its path on every call until you fix it: invalid JSON, an unreadable file, or a `freshSession` that is not an object fall back to all defaults; an unknown key (such as `revew`) is ignored and an invalid value uses that key's default, while the other keys still apply.
+
+Good to know:
+
+- Every command appears twice in the `/` menu, once as prompt template and once from the extension. Both run the extension.
+- `/flow` stops at the end of every phase (spec approved, plan approved, plan built, review verdict) and asks you to continue with `/flow`, so each phase starts with fresh context. Run `/flow` once per phase.
+- Turn the extension off with `pi config`. The prompt templates then run in the current session as before.
+- If the package is loaded twice (for example installed globally and loaded again with `pi -e`), pi renames the duplicate commands to `plan:1`, `plan:2` and so on, and `/plan` silently falls back to the template. Turn one copy off with `pi config`.
+- Background subagents still running in the old session are not detected. They keep running there after the switch.
+
 ### `.specs/` and worktrees
 
 Spec and plan live in `<main>/.specs/<date>-<topic>/`, where `<main>` is the main checkout (the first entry of `git worktree list`). `.specs/` is excluded via `.git/info/exclude` and never committed. Without a path or topic, every phase in a linked worktree first takes the newest open item whose `Branch:` line is that worktree's branch. Otherwise it searches `<main>/.specs/` first, then `.specs/` of the current worktree. See [Find the work item](references/worktrees.md#find-the-work-item).

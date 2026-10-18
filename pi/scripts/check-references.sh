@@ -2,10 +2,15 @@
 # Verify command for pi/. Keeps the worktree rules in pi/references/worktrees.md,
 # the README diagram in sync with pi/flow.mmd, the fork boundaries (only pi/ changes), and runs
 # the tests in pi/scripts/ (among them the drift check of the tiers block in pi/workflows/*.js).
-# Usage: bash pi/scripts/check-references.sh <base>
+# Usage: bash pi/scripts/check-references.sh <base> [allowed path outside pi/ ...]
+#   Extra arguments are paths outside pi/ that may change, e.g. package.json for the
+#   pi.extensions entry: bash pi/scripts/check-references.sh main package.json
 set -uo pipefail
 
-base=${1:?usage: check-references.sh <base>}
+base=${1:?usage: check-references.sh <base> [allowed path outside pi/ ...]}
+shift
+excludes=(':!pi')
+for allowed in "$@"; do excludes+=(":!$allowed"); done
 cd "$(dirname "$0")/../.." || exit 1
 ref=pi/references/worktrees.md
 fail=0
@@ -43,9 +48,9 @@ done
 
 # e) Fork boundaries: nothing changed outside pi/ since the branch left <base> (tracked or new
 #    untracked files), no terminal-multiplexer hook. Diff against the merge-base, so new commits
-#    on <base> do not turn this red.
+#    on <base> do not turn this red. Paths given after <base> are allowed as well.
 mb=$(git merge-base "$base" HEAD) || { err "e) no merge-base with $base"; mb=$base; }
-outside=$( { git diff --name-only "$mb" -- . ':!pi'; git ls-files --others --exclude-standard -- . ':!pi'; } | sort -u)
+outside=$( { git diff --name-only "$mb" -- . "${excludes[@]}"; git ls-files --others --exclude-standard -- . "${excludes[@]}"; } | sort -u)
 [ -z "$outside" ] || err "e) files outside pi/ changed since $base: $(echo $outside)"
 # The bracket keeps this line from matching itself.
 if grep -rIqi 'herd[r]' pi; then err "e) pi/ mentions herd""r"; fi

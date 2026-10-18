@@ -11,7 +11,7 @@ No product code, scaffolding, or dependency installs in this phase. Reading and 
 
 ## 1. Recon
 
-Read before you ask. Explore the code the request touches. For more than a handful of files, use an Explore subagent and keep its summary, not raw output. Never ask what the code answers.
+Read before you ask. When you resume a spec that has a `Branch:` line, first run `../../references/worktrees.md#working-directory` and explore in `<wd>`. Explore the code the request touches. For more than a handful of files, use an Explore subagent and keep its summary, not raw output. Never ask what the code answers.
 
 If the request is trivially clear (a one-liner, a rename), say so and suggest doing it directly without the flow. If it bundles several independent features, say so, propose an order, and spec one at a time.
 
@@ -93,4 +93,4 @@ Merge the result per `../../references/panel-synthesis.md`. Resolve items the sp
 
 Send: the spec path, a 3-5 line summary, and the synthesized review items. Ask whether to approve or correct, and end your turn.
 
-On answers: update the spec, report only which decisions changed, and ask again only if new open points arose. On approval: set `Status: approved <date>` and name the next step: `/plan <spec path>`, ideally in a fresh session.
+On answers: update the spec, report only which decisions changed, and ask again only if new open points arose. On approval: set `Status: approved <date>` and name the next step: `/plan <spec path>`. The command starts a fresh session itself when needed.
