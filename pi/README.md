@@ -44,10 +44,11 @@ flowchart TD
 
     subgraph S1["1 · SPEC"]
         recon["Recon<br/>reads the code"]
+        detect["Start check: git state<br/>note, or ask: new worktree<br/>parent/.worktrees/repo/topic now?"]
         mode{"Goal clear?"}
         intent["Clarify intent<br/>one question per message<br/>with a guess"]
         rounds["Detail rounds: understood ·<br/>assumptions · questions with recommendation"]
-        specmd[/"spec.md · max. one page"/]:::file
+        specmd[/"main/.specs/date-topic/spec.md<br/>Branch · Base · max. one page"/]:::file
         subgraph SR["Spec review · Opus medium · parallel"]
             l1["Builder"]
             l2["Edge cases"]
@@ -55,7 +56,7 @@ flowchart TD
         end
         syn1["Synthesis ✅ ⚖️ ❓ 🗑️<br/>with examples"]
         stop1{{"STOP<br/>approve spec?"}}:::stop
-        recon --> mode
+        recon --> detect --> mode
         mode -->|no| intent
         intent -->|"you answer"| intent
         intent -->|"intent clear"| rounds
@@ -89,7 +90,7 @@ flowchart TD
     end
 
     subgraph S3["3 · BUILD · runs without you"]
-        wt["Worktree + branch feat/topic<br/>baseline green?"]
+        wt["Worktree of the spec's branch<br/>found anywhere, else created in<br/>parent/.worktrees/repo/topic<br/>baseline green?"]
         task["Task Tn: fresh subagent<br/>RED → GREEN → verify"]
         gate{"Gate:<br/>tests green?"}
         cp["Checkpoint commit [Tn]<br/>unsigned"]
@@ -132,13 +133,21 @@ flowchart TD
 
 | Command | Does | Stops for you |
 |---|---|---|
-| `/spec <request>` | Recon, then intent questions one at a time if the goal is unclear ("one by one" forces it), then detail rounds with recommendations, one-page spec, three-lens spec review | yes |
+| `/spec <request>` | Recon, then a start check of the git state (a note, or the question whether to work in a new worktree now), then intent questions one at a time if the goal is unclear ("one by one" forces it), then detail rounds with recommendations, one-page spec, three-lens spec review | yes |
 | `/plan [spec]` | Design arena: grounding, 2-3 competing designs (minimal, domain, caller), cross-judge, graft. Then the task plan | yes |
-| `/build [plan]` | Worktree on `feat/<topic>`, one fresh subagent per task, verify command as gate, one commit per task. No per-task review | only on blockers |
+| `/build [plan]` | Worktree on the spec's branch: reuses it wherever it lives, else creates `<wtroot>/<topic>`. Never builds in the main checkout. One fresh subagent per task, verify command as gate, one commit per task. No per-task review | only on blockers |
 | `/review [plan]` | code-reviewer, security-auditor, test-engineer in parallel on the branch diff. Verified, merged verdict | yes, applies nothing |
 | `/flow [request]` | Detects the phase from `.specs/` and git and runs the next one. Same stops as above | per phase |
 
-Spec and plan live in `<repo>/.specs/<date>-<topic>/` and are excluded via `.git/info/exclude`, never committed.
+### `.specs/` and worktrees
+
+Spec and plan live in `<main>/.specs/<date>-<topic>/`, where `<main>` is the main checkout (the first entry of `git worktree list`). `.specs/` is excluded via `.git/info/exclude` and never committed. Every phase searches `<main>/.specs/` first, then `.specs/` of the current worktree.
+
+Feature work happens in a git worktree from the start. Worktrees live in `<wtroot>/<topic>` on `feat/<topic>` (or `fix/<topic>`), where `<wtroot>` is `<parent>/.worktrees/<repo>`: `/workspace/agent-skills` gets `/workspace/.worktrees/agent-skills/<topic>`. Nothing is nested inside the repo, so tools do not scan a second checkout.
+
+After recon, `/spec` checks the git state. In a linked worktree on a feature branch it only notes where it works. In the main checkout, on a protected branch, or on a detached HEAD, it asks whether to create the worktree now (carrying the changes along, if you want) or at `/build`. The spec records `Branch:` and `Base:`, and `/plan`, `/build` and `/review` take both from there.
+
+The repo's parent dir must be writable and persistent. Otherwise worktree creation stops with the path and the error. Deleting a repo leaves its `<wtroot>` behind: remove that orphaned dir by hand. All rules, questions and recovery steps are in [`pi/references/worktrees.md`](references/worktrees.md), see [Parent requirements](references/worktrees.md#parent-requirements).
 
 ## Pieces
 

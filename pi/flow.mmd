@@ -3,10 +3,11 @@ flowchart TD
 
     subgraph S1["1 · SPEC"]
         recon["Recon<br/>reads the code"]
+        detect["Start check: git state<br/>note, or ask: new worktree<br/>parent/.worktrees/repo/topic now?"]
         mode{"Goal clear?"}
         intent["Clarify intent<br/>one question per message<br/>with a guess"]
         rounds["Detail rounds: understood ·<br/>assumptions · questions with recommendation"]
-        specmd[/"spec.md · max. one page"/]:::file
+        specmd[/"main/.specs/date-topic/spec.md<br/>Branch · Base · max. one page"/]:::file
         subgraph SR["Spec review · Opus medium · parallel"]
             l1["Builder"]
             l2["Edge cases"]
@@ -14,7 +15,7 @@ flowchart TD
         end
         syn1["Synthesis ✅ ⚖️ ❓ 🗑️<br/>with examples"]
         stop1{{"STOP<br/>approve spec?"}}:::stop
-        recon --> mode
+        recon --> detect --> mode
         mode -->|no| intent
         intent -->|"you answer"| intent
         intent -->|"intent clear"| rounds
@@ -48,7 +49,7 @@ flowchart TD
     end
 
     subgraph S3["3 · BUILD · runs without you"]
-        wt["Worktree + branch feat/topic<br/>baseline green?"]
+        wt["Worktree of the spec's branch<br/>found anywhere, else created in<br/>parent/.worktrees/repo/topic<br/>baseline green?"]
         task["Task Tn: fresh subagent<br/>RED → GREEN → verify"]
         gate{"Gate:<br/>tests green?"}
         cp["Checkpoint commit [Tn]<br/>unsigned"]
