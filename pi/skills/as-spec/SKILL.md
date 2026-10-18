@@ -15,9 +15,13 @@ Read before you ask. Explore the code the request touches. For more than a handf
 
 If the request is trivially clear (a one-liner, a rename), say so and suggest doing it directly without the flow. If it bundles several independent features, say so, propose an order, and spec one at a time.
 
+After recon, run `../../references/worktrees.md#detect` and keep the result: the case number plus a note or a question.
+
 ## 2. Clarify
 
 After recon, decide which mode fits and say it in one line.
+
+The first clarification message carries the Detect result. In 2a, a note goes in as one line before the question, and a question is that message's single question. In 2b, a note goes into **Understood**, and a question becomes Question 1 with its recommendation. If the user chooses abort, end the flow without changes.
 
 ### 2a. Intent mode: the goal itself is unclear
 
@@ -37,19 +41,25 @@ One message per round with three parts:
 2. **Assumptions:** a numbered list. Mark each as your guess and say they hold unless corrected.
 3. **Questions:** every open point whose answer changes what gets built, numbered, most important first. Each with your recommendation, a one-line reason, and an example when the effect is not obvious, so "ok" is a valid answer. Many questions in one round are fine.
 
-Always ask where the work happens: which branch or worktree, and whether the build may create checkpoint commits. Recommend a separate worktree when the checkout has uncommitted changes. Also ask how to verify: a fast, targeted check per task (the tests the task touches, the tests it writes under TDD) and the full suite once at the end, or the full suite per task. Measure how long both take and recommend from that. Record both answers under Boundaries.
+Where the work happens comes from the Detect result; do not ask about the branch or worktree again. Always ask whether the build may create checkpoint commits, and how to verify: a fast, targeted check per task (the tests the task touches, the tests it writes under TDD) and the full suite once at the end, or the full suite per task. Measure how long both take and recommend from that. Record both answers under Boundaries.
 
 Turn vague goals into checkable criteria ("faster" becomes "p95 under 200 ms for X"). Repeat rounds until no open point changes what gets built. Then write the spec.
 
 ## 3. Write the spec
 
-Path: `<repo>/.specs/<YYYY-MM-DD>-<topic>/spec.md`. Spec and plan are never committed: make sure `.specs/` is listed in `.git/info/exclude` (append it if missing, never edit `.gitignore`).
+Spec and plan are never committed. Before writing:
+
+1. Run `../../references/worktrees.md#excludes`.
+2. If the user chose a worktree now (now, carry, or leave), run `worktrees.md#create`. For carry, then run the spec step of `worktrees.md#carried-changes`. On any stop, report per `worktrees.md#stops-and-recovery` and end your turn.
+3. Path: `<main>/.specs/<YYYY-MM-DD>-<topic>/spec.md`, with `<main>` and `<topic>` per `worktrees.md#terms`. On resume, keep the resumed spec dir. The header lines after `Status:` follow `worktrees.md#spec-header`.
 
 At most one page. Drop empty sections. Mark every decision you made yourself as an assumption or your call.
 
 ```markdown
 # Spec: <title>
 Status: draft
+Branch: <branch> · Base: <base>      (omit both lines in Detect case 1)
+Carried changes: yes                 (only after a carry, see worktrees.md#spec-header; else omit)
 
 ## Goal
 Who, what, why. 2-4 sentences.

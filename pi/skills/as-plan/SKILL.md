@@ -5,7 +5,7 @@ description: Phase 2 of the /spec → /plan → /build → /review flow. Use onl
 
 # Plan
 
-Input: an approved spec. Take the path from the request, else the newest `.specs/*/spec.md`. If its status is not `approved`, stop and say so.
+Input: an approved spec. Find it per `../../references/worktrees.md#find-the-work-item`: the path or topic from the request, else the newest approved `spec.md`. If its status is not `approved`, stop and say so.
 
 No product code in this phase. Language rules: `../../references/language.md`.
 
@@ -56,7 +56,7 @@ Signatures as code, bodies `not implemented`.
 
 ## Execution
 - Verify: `<full test command, with a terse reporter>`
-- Base: <branch> · Feature branch: feat/<topic>
+- Branch: <branch> · Base: <base>   (the spec's `Branch:` line, copied verbatim per `worktrees.md#spec-header`)
 - Workstreams: one | <name: tasks, files> (only for disjoint files)
 
 ## Tasks
