@@ -58,7 +58,8 @@ At most one page. Drop empty sections. Mark every decision you made yourself as 
 ```markdown
 # Spec: <title>
 Status: draft
-Branch: <branch> · Base: <base>      (omit both lines in Detect case 1)
+Branch: <branch> · Base: <base>      (omit all header lines in Detect case 1)
+Worktree: linked                     (only in Detect case 2, see worktrees.md#spec-header; else omit)
 Carried changes: yes                 (only after a carry, see worktrees.md#spec-header; else omit)
 
 ## Goal

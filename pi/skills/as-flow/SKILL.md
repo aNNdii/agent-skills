@@ -10,7 +10,7 @@ One entry point for the four phases. The state lives in files, not in this conve
 ## 1. Find the work item
 
 - The request names a new feature: start a new item and go to the spec phase.
-- Otherwise run `../../references/worktrees.md#find-the-work-item` with the path or topic from the request, else for the newest item that is not `done`. If there are several open ones, list them and ask which one.
+- Otherwise run `../../references/worktrees.md#find-the-work-item` with the path or topic from the request, else for the newest item that is not `done`. If there are several open ones and Find the work item did not pick one by its `Branch:` line, list them and ask.
 
 ## 2. Detect the phase
 
