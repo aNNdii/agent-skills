@@ -7,6 +7,8 @@ description: Phase 2 of the /spec → /plan → /build → /review flow. Use onl
 
 Input: an approved spec. Find it per `../../references/worktrees.md#find-the-work-item`: the path or topic from the request, else the newest approved `spec.md`. If its status is not `approved`, stop and say so.
 
+Then run `../../references/worktrees.md#working-directory` with the spec's `Branch:` line. Recon, the size check, the arena and the design check all read the code in `<wd>`.
+
 No product code in this phase. Language rules: `../../references/language.md`.
 
 ## 1. Size check
@@ -15,7 +17,7 @@ If the change is one or two files with an obvious approach, skip the arena. Writ
 
 ## 2. Design arena
 
-Resolve `tiers` per `../../references/model-tiers.md` and add it to `args` (leave it out if nothing resolves). Call `SubagentWorkflow` with `name: "as-design-arena"` and `args: { specPath, repo, redFlagsPath, tiers }`, where `redFlagsPath` is the absolute path of `../../references/design-red-flags.md`. It runs in the background. Wait for the completion notification, do not poll.
+Resolve `tiers` per `../../references/model-tiers.md` and add it to `args` (leave it out if nothing resolves). Call `SubagentWorkflow` with `name: "as-design-arena"` and `args: { specPath, repo, redFlagsPath, tiers }`, where `repo` is `<wd>` and `redFlagsPath` is the absolute path of `../../references/design-red-flags.md`. It runs in the background. Wait for the completion notification, do not poll.
 
 The default lenses are minimal, domain, and caller. When the spec suggests sharper angles (say "offline-first" against "server-authoritative"), pass `lenses` with two or three structurally different briefs instead.
 
@@ -82,4 +84,4 @@ Task rules:
 
 Send: the plan path, the design in 5-8 lines, the decisions table, every decision still marked "recommendation (unconfirmed)" as a numbered item, and the tasks one line each. Ask whether to approve or correct, and end your turn.
 
-On approval: set `Status: approved <date>` and name the next step: `/build <plan path>`, ideally in a fresh session.
+On approval: set `Status: approved <date>` and name the next step: `/build <plan path>`. The command starts a fresh session itself when needed.

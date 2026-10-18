@@ -5,6 +5,9 @@
   "description": "addyosmani/agent-skills fork with a pi flow: /spec -> /plan (design arena) -> /build (worktree, no per-task review) -> /review (persona panel).",
   "keywords": ["pi-package"],
   "license": "MIT",
+  "scripts": {
+    "test:pi": "node --test pi/extensions/test/"
+  },
   "pi": {
     "skills": [
       "./skills",
@@ -20,6 +23,7 @@
       "./pi/skills"
     ],
     "prompts": ["./pi/prompts/*.md"],
+    "extensions": ["./pi/extensions/*.ts"],
     "subagents": {
       "agents": ["./agents"],
       "workflows": ["./pi/workflows"]

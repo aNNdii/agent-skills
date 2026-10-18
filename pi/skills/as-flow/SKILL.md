@@ -5,7 +5,7 @@ description: Runs the whole /spec → /plan → /build → /review flow phase by
 
 # Flow
 
-One entry point for the four phases. The state lives in files, not in this conversation, so `/flow` resumes correctly in a fresh session.
+One entry point for the four phases. The state lives in files, not in this conversation, so `/flow` resumes correctly. The command itself starts a fresh session when needed.
 
 ## 1. Find the work item
 
@@ -30,4 +30,6 @@ Say which phase you detected in one line, in the user's language (`../../referen
 
 ## 3. Between phases
 
-When the user passes a stop (approves the spec, decides the design, approves the plan), continue directly with the next phase in the same turn. Before `/build`, recommend a fresh session with `/flow` when this conversation is already long, since everything needed is in the files.
+The end of a phase is a stop: the spec is approved, the plan is approved, the plan is `built`, or the review verdict is sent. Do not start the next phase in the same turn. End the message with "continue with `/flow`" in the user's language, instead of the phase skill's next command.
+
+Inside a phase, keep going in the same session: answers to open points, the design decision, and corrections continue the current phase.
