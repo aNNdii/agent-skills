@@ -1,6 +1,6 @@
 ---
 name: as-spec
-description: Phase 1 of the /spec → /plan → /build → /review flow. Use only when the user runs /spec or explicitly asks to start a spec for a feature. Clarifies intent and details, writes a one-page spec, runs a three-lens spec review, then stops for approval.
+description: Phase 1 of the /spec → /plan → /build → /review flow. Use only when the user runs /spec or explicitly asks to start a spec for a feature. Clarifies intent and details, writes a one-page spec, runs a three-lens spec review, then stops for approval. Do not start it unasked, but when a request spans several repositories or subsystems, or its acceptance criteria are unclear, suggest /spec in one sentence before implementing, and propose a separate branch or worktree before changing code.
 ---
 
 # Spec
@@ -36,6 +36,8 @@ One message per round with three parts:
 1. **Understood:** what you think they want and why, in 3-5 sentences.
 2. **Assumptions:** a numbered list. Mark each as your guess and say they hold unless corrected.
 3. **Questions:** every open point whose answer changes what gets built, numbered, most important first. Each with your recommendation, a one-line reason, and an example when the effect is not obvious, so "ok" is a valid answer. Many questions in one round are fine.
+
+Always ask where the work happens: which branch or worktree, and whether the build may create checkpoint commits. Recommend a separate worktree when the checkout has uncommitted changes. Also ask how to verify: a fast, targeted check per task (the tests the task touches, the tests it writes under TDD) and the full suite once at the end, or the full suite per task. Measure how long both take and recommend from that. Record both answers under Boundaries.
 
 Turn vague goals into checkable criteria ("faster" becomes "p95 under 200 ms for X"). Repeat rounds until no open point changes what gets built. Then write the spec.
 
