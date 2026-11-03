@@ -54,6 +54,28 @@ test('an unknown commits value is rejected before any agent runs', async () => {
   assert.equal(ran, false);
 });
 
+test('every persona checks findings against callers, guards and tests, and may return none', async () => {
+  const { calls } = await run(ARGS);
+  for (const { prompt } of calls) {
+    assert.ok(prompt.includes('check it against the callers, guards and tests that reach the changed code'), prompt);
+    assert.ok(prompt.includes('Drop it if they rule it out'), prompt);
+    assert.ok(prompt.includes('Zero findings is a valid result; do not invent one'), prompt);
+  }
+});
+
+test('every finding states whether the change introduced it or the base already had it', async () => {
+  for (const commits of ['checkpoints', 'none']) {
+    const { calls } = await run({ ...ARGS, commits });
+    for (const { prompt, schema } of calls) {
+      const finding = schema.properties.findings.items;
+      assert.deepEqual(finding.properties.origin.enum, ['regression', 'pre-existing']);
+      assert.ok(finding.required.includes('origin'));
+      assert.ok(prompt.includes("`git -C '/wt/x' merge-base HEAD main`"), prompt);
+      assert.ok(prompt.includes('`pre-existing`'), prompt);
+    }
+  }
+});
+
 test('a persona without a result is reported as missing', async () => {
   const { result, logs } = await run(ARGS, label => (label === 'review:security-auditor' ? null : REVIEW));
   assert.deepEqual(result.missing, ['security-auditor']);
