@@ -25,9 +25,11 @@ Resolve `tiers` per `../../references/model-tiers.md` and add it to `args` (leav
 
 ## 3. Verify and merge
 
-- Open every critical or important finding at its file:line and confirm the failure path yourself before you list it.
+- Open every critical or important finding at its file:line and confirm the failure path yourself before you list it. Check it against the callers, guards and tests that reach the changed code, and dismiss it if they rule it out.
+- Confirm each finding's `origin` against the merge-base (`git -C <wt> merge-base HEAD <base>`): `regression` if this change introduces it, `pre-existing` if the base already has it.
 - Merge per `../../references/panel-synthesis.md`. Findings two personas raise, or that you confirmed, are consensus items.
-- Sort into **Act on** (would block a real PR), **Consider**, **Noted**, **Dismissed** (one line each with the reason).
+- Sort into **Act on** (would block a real PR), **Consider**, **Noted**, **Dismissed** (one line each with the reason). A pre-existing defect never goes into Act on: list it under Consider or Noted, marked as pre-existing, so it does not block this branch.
+- Zero findings is a valid verdict. Do not promote a nit to fill a section.
 - Add an acceptance table: each criterion from the spec, met, partial, or missing, with evidence.
 
 ## 4. Stop

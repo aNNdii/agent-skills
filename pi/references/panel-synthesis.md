@@ -13,7 +13,8 @@ Merge items that describe the same underlying issue, even when phrased different
 You can see the whole context, the reviewers saw a slice. For every item:
 
 - **Already answered** by the spec, the code, or an earlier user answer: resolve it yourself, note where. Do not ask the user.
-- **Hypothetical**: keep it only if a real path exists. Trace the caller. If the type system or upstream validation prevents it, dismiss it.
+- **Hypothetical**: keep it only if a real path exists. Trace the callers, guards and tests that reach the code. If they, the type system, or upstream validation prevent it, dismiss it.
+- **Pre-existing** (code review): a defect the base already has is not a regression of this change. Mark it as pre-existing and keep it apart from what the change introduces.
 - **"I would have done it differently"** without a concrete problem: dismiss.
 - **Premature abstraction** ("extract an interface", "make it configurable") with no second use: dismiss.
 - **Nitpick gravity**: reviewers fill space. If a lens found only nits, say its area looks fine.

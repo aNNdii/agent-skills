@@ -88,8 +88,13 @@ const SCHEMA = {
           recommendation: { type: 'string' },
           example: { type: 'string', description: 'A concrete repro: input or call and the wrong result, or the 2-3 offending lines' },
           confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
+          origin: {
+            type: 'string',
+            enum: ['regression', 'pre-existing'],
+            description: 'regression: this change introduces it; pre-existing: the merge-base already has it',
+          },
         },
-        required: ['severity', 'file', 'title', 'detail', 'recommendation', 'confidence'],
+        required: ['severity', 'file', 'title', 'detail', 'recommendation', 'confidence', 'origin'],
       },
     },
     acceptance: {
@@ -123,9 +128,10 @@ const prompt = persona =>
     'Rules:',
     '- Read-only. Do not edit, commit, format, or install anything. Running the existing tests is fine.',
     '- Review the change and what it affects, not unrelated code.',
-    '- Trace call sites before claiming a bug. Every finding names file:line and a concrete failure path.',
+    '- Before reporting a finding, check it against the callers, guards and tests that reach the changed code. Drop it if they rule it out. Every finding names file:line and a concrete failure path.',
+    `- Set \`origin\`: \`regression\` when this change introduces the defect, \`pre-existing\` when the base already has it. Check the base version at \`git -C '${worktree}' merge-base HEAD ${base}\` when unsure.`,
     '- No "I would do it differently" without a concrete problem. No abstractions without a second use.',
-    '- If your area looks fine, say so. Few or zero findings is a valid result.',
+    '- If your area looks fine, say so. Zero findings is a valid result; do not invent one.',
     '- Fill `acceptance` for every acceptance criterion in the spec, with evidence.',
     '- Return the result through StructuredOutput.',
   ].join('\n')

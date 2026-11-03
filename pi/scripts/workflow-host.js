@@ -40,7 +40,7 @@ function loadBody(scriptPath) {
  * Runs the real workflow script at scriptPath with stubbed globals.
  * reply(label, prompt) returns the agent's structured result, or null for a
  * failed gate or a stopped agent (all the script ever sees).
- * Returns { result, calls: [{ prompt, label, gate, effort, agentType, model }], logs }.
+ * Returns { result, calls: [{ prompt, label, gate, effort, agentType, model, schema }], logs }.
  */
 async function runWorkflow(scriptPath, args, reply) {
   const calls = [];
@@ -54,6 +54,7 @@ async function runWorkflow(scriptPath, args, reply) {
         effort: opts.effort,
         agentType: opts.agentType,
         model: opts.model,
+        schema: opts.schema === undefined ? undefined : JSON.parse(JSON.stringify(opts.schema)),
       });
       const value = await reply(opts.label, prompt);
       return value === null || value === undefined ? null : realmParse(JSON.stringify(value));
