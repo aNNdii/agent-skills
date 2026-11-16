@@ -119,7 +119,7 @@ flowchart TD
         end
         evidence["Evidence: diff + Final verify"]
         verify["Orchestrator verifies<br/>every finding itself"]
-        verdict[/"review.md<br/>Act on · Consider · Noted · Dismissed<br/>+ acceptance table"/]:::file
+        verdict[/"review.md<br/>Act on · Consider · Noted · Dismissed<br/>+ acceptance table · deferred"/]:::file
         stop3{{"STOP<br/>pick numbers"}}:::stop
         fixes["Fixes as checkpoints [review-n]<br/>or staged, each after a green Final verify"]
         squash["Squash → one signed commit<br/>Commits: none → commit or leave staged<br/>after a commit: rebase, Final verify again"]

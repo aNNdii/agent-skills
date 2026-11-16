@@ -28,6 +28,8 @@ Two verify levels: `Verify per task` gates every task, `Final verify` checks the
 
 On any stop, report the state and the options (per `worktrees.md#stops-and-recovery` where it names the stop) and end your turn.
 
+A new idea or requirement that comes up during the build, from the user or from a task, does not enter it. Append it to the spec's Non-goals as `- <what> — deferred, raised during /build`, say so in one line, and go on. Building it needs its own `/spec`.
+
 ## 2. Run
 
 Resolve `tiers` per `../../references/model-tiers.md` and add it to `args` (leave it out if nothing resolves). Call `SubagentWorkflow` with `name: "as-build"` and these args:

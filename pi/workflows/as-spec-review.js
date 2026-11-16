@@ -80,7 +80,9 @@ const DEFAULT_LENSES = [
     key: 'scope',
     brief:
       'Scope and intent. Are goals, non-goals, and boundaries right and consistent with the codebase? ' +
-      'Is anything over-built or missing for the stated goal? Is every acceptance criterion checkable?',
+      'Is anything over-built or missing for the stated goal? Is every acceptance criterion checkable? ' +
+      'If the spec changes existing behavior, does it name what must keep working as acceptance criteria? ' +
+      'Does every non-goal say why it is left out (deferred or never)?',
   },
 ]
 
