@@ -31,4 +31,4 @@ Say which phase you detected in one line, in the user's language (`../../referen
 
 ## 3. Between phases
 
-When the user passes a stop (approves the spec, decides the design, approves the plan), continue directly with the next phase in the same turn. Before `/build`, recommend a fresh session with `/flow` when this conversation is already long, since everything needed is in the files.
+When the user decides the design, continue with the plan in the same turn. At the spec approval, the plan approval and the `/build` report, the next phase starts per `../../references/next-phase.md`; `This session: …` continues here in the same turn.

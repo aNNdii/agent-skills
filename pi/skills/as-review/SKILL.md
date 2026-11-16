@@ -7,7 +7,7 @@ description: Phase 4 of the /spec → /plan → /build → /review flow. Use onl
 
 Input: a built plan. Find it per `../../references/worktrees.md#find-the-work-item`: the path or topic from the request, else the newest plan with `Status: built`. `<branch>` and `<base>` come only from the plan's `Execution` line `Branch: <branch> · Base: <base>`. Never derive the base from the current branch. If the line is missing or a value is empty, stop and ask for both. If `<branch>` is protected (`../../references/worktrees.md#terms`), stop. The worktree `<wt>` is the worktree of `<branch>` (`../../references/worktrees.md#terms`). If there is none, or its path is `<main>`, stop and say so: review, fixes and the squash never run in the main checkout. Offer to recreate the worktree per `../../references/worktrees.md#create` (after switching `<main>` away from `<branch>` per `../../references/worktrees.md#locate-for-build`). Run every git command below with `git -C <wt>`.
 
-Language rules: `../../references/language.md`.
+Language rules: `../../references/language.md`. Inbox mode: `../../references/inbox.md` decides the shape of every message to the user.
 
 Read `Commits` (`checkpoints` or `none`, default `checkpoints`) and `Final verify` from `Execution`. An older plan with only `- Verify: <cmd>` uses that command as its Final verify.
 
@@ -35,13 +35,13 @@ Resolve `tiers` per `../../references/model-tiers.md` and add it to `args` (leav
 
 ## 4. Stop
 
-Save the verdict to `<spec dir>/review.md`, set the plan to `Status: reviewed <date>`, then send the verdict with numbered items and end your turn. Apply nothing yet.
+Save the verdict to `<spec dir>/review.md`, set the plan to `Status: reviewed <date>`, then send the verdict with numbered items, ask which to fix, or whether to finish now (recommended when nothing is under Act on), and end your turn. Apply nothing yet.
 
-The user picks numbers. Fix those in the worktree one at a time. After each fix, run Final verify as in §1. Only when it is green, take the fix: in mode `checkpoints` `git -C <wt> add -A` and one unsigned checkpoint commit tagged `[review-<n>]` (`git -C <wt> -c commit.gpgsign=false commit -m "fix: <what> [review-<n>]"`), in mode `none` `git -C <wt> add -A`. Red: fix the root cause and run Final verify again; if it stays red, leave the fix unstaged, report each red command with its output and `git -C <wt> status --porcelain`, and end your turn before the next fix, so `git add -A` never takes a red fix into the next one. No new review round unless the user asks for one.
+The user picks numbers: fix, don't fix, or later. Append each item deferred for later to the spec's Non-goals as `- <what> — deferred, raised in /review`. Fix the picked ones in the worktree one at a time. After each fix, run Final verify as in §1. Only when it is green, take the fix: in mode `checkpoints` `git -C <wt> add -A` and one unsigned checkpoint commit tagged `[review-<n>]` (`git -C <wt> -c commit.gpgsign=false commit -m "fix: <what> [review-<n>]"`), in mode `none` `git -C <wt> add -A`. Red: fix the root cause and run Final verify again; if it stays red, leave the fix unstaged, report each red command with its output and `git -C <wt> status --porcelain`, and end your turn before the next fix, so `git add -A` never takes a red fix into the next one. No new review round unless the user asks for one. After the last fix, report **Fixed** (one line per item with its checkpoint) and **Final verify**, and ask whether to finish or fix more.
 
 ## 5. Finish
 
-When the user says done, turn the result into one commit in `<wt>`. Write the message from spec and plan: a conventional subject line, three to five lines of what changed for callers, and a last line such as `Spec: AC1-AC4 · Tasks: T1-T3 · Review fixes: 2`. Commit messages are always English and signed per the user's git config. First get `<onto>` per `../../references/worktrees.md#squash-base`.
+When the user says done or chooses to finish, turn the result into one commit in `<wt>`. Write the message from spec and plan: a conventional subject line, three to five lines of what changed for callers, and a last line such as `Spec: AC1-AC4 · Tasks: T1-T3 · Review fixes: 2`. Commit messages are always English and signed per the user's git config. First get `<onto>` per `../../references/worktrees.md#squash-base`.
 
 Mode `checkpoints`: squash all commits since `<onto>` (the `[wip]` commit of carried changes, the `[T<n>]`, `[final]` and `[review-<n>]` checkpoints). If Squash base returns `no squash`, skip steps 1-3.
 

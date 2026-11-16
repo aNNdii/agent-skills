@@ -7,7 +7,7 @@ description: Phase 3 of the /spec → /plan → /build → /review flow. Use onl
 
 Input: an approved plan (`Status: approved`). Find it per `../../references/worktrees.md#find-the-work-item`: the path or topic from the request, else the newest plan with `Status: approved`. If it is not approved, stop. `<branch>` and `<base>` come only from the plan's `Execution` line `Branch: <branch> · Base: <base>`.
 
-Language rules: `../../references/language.md`.
+Language rules: `../../references/language.md`. Inbox mode: `../../references/inbox.md` decides the shape of every message to the user.
 
 Plan approval is the only gate. Do not ask for confirmation again, except for the questions `worktrees.md#locate-for-build` asks before it changes `<main>` and the stops below. Run to the end.
 
@@ -58,7 +58,7 @@ It runs in the background. Wait for the completion notification, do not poll. It
 3. **Several workstreams:** merge them back per `worktrees.md#workstreams`.
 4. Run the Final verify below.
 5. Check off the finished tasks in `plan.md` where `worktrees.md#find-the-work-item` found it. Only when every task is done and Final verify is green, set `Status: built <date>` and add the worktree path and branch under `Execution`. Otherwise the plan stays `approved`.
-6. Report one line per task (commit, or staged in mode `none`, and a deviation if any), the Final verify output per command as evidence, the worktree path, and the branch. Next step: `/review`.
+6. Report **Tasks** (one line per task: commit, or staged in mode `none`, and a deviation if any), **Final verify** (the output per command as evidence) and **Where** (the worktree path and the branch), and ask how `/review` starts per `../../references/next-phase.md`.
 
 ### Final verify
 
