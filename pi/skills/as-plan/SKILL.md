@@ -11,7 +11,7 @@ No product code in this phase. Language rules: `../../references/language.md`.
 
 ## 1. Size check
 
-If the change is one or two files with an obvious approach, skip the arena. Write a short plan directly (design in five lines plus tasks), say you skipped it and why, and go to step 4.
+If the change is one or two files with an obvious approach, skip the arena. Write a short plan directly (design in five lines plus tasks, and the views per `../../references/architecture-views.md` whose "When" holds), say you skipped it and why, and go to step 4.
 
 ## 2. Design arena
 
@@ -47,7 +47,8 @@ Write `<spec dir>/plan.md`. Not committed.
 Status: draft · Spec: spec.md
 
 ## Design
-Usage (2-3 real call sites) → types and signatures → module map → data flow.
+Usage (2-3 real call sites) → types and signatures → the views per ../../references/architecture-views.md
+whose "When" holds, each under its own `###`; without any, one line of data flow.
 Signatures as code, bodies `not implemented`.
 
 ## Decisions

@@ -74,6 +74,10 @@ Carried changes: yes                 (only after a carry, see worktrees.md#spec-
 ## Goal
 Who, what, why. 2-4 sentences.
 
+## System context
+The Context view per ../../references/architecture-views.md, only when its "When" holds.
+Its code block does not count towards the page.
+
 ## Non-goals
 - <what> — <why: deferred to a later change, or never>
 

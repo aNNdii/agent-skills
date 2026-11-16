@@ -167,7 +167,7 @@ The repo's parent dir must be writable and persistent. Otherwise worktree creati
 
 - `pi/skills/as-*`: the four phases. Invoked through `pi/prompts/*.md`.
 - `pi/workflows/*.js`: deterministic fan-outs for `SubagentWorkflow` (pi-subagents). Each role has a tier (`high`, `mid`, `low`) and an effort: spec review, design, judge, and final review run high/high, grounding low/medium, implementation mid/medium, hard tasks high/high, and a retry one tier above its first attempt with high effort. The lead resolves the provider's models into `args.tiers` per `pi/references/model-tiers.md`; without it, every agent inherits the session model (only the Explore grounding agent keeps its own small model).
-- `pi/references/`: model tiers (how the lead maps the provider's models to `high`, `mid`, `low`), panel synthesis (consensus, split, single, dismissed), design red flags, and language rules (talk and write specs in the user's language, keep repo text, status values, and ids in English).
+- `pi/references/`: model tiers (how the lead maps the provider's models to `high`, `mid`, `low`), panel synthesis (consensus, split, single, dismissed), design red flags, language rules (talk and write specs in the user's language, keep repo text, status values, and ids in English), and architecture views (which arc42 / C4 views spec and plan draw, and how).
 - `pi/skills/principles/`: three short pstack principles, auto-loaded when they apply.
 - `agents/`: the upstream personas, registered as pi subagents.
 
