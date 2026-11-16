@@ -30,7 +30,8 @@ Resolve `tiers` per `../../references/model-tiers.md` and add it to `args` (leav
 - Merge per `../../references/panel-synthesis.md`. Findings two personas raise, or that you confirmed, are consensus items.
 - Sort into **Act on** (would block a real PR), **Consider**, **Noted**, **Dismissed** (one line each with the reason). A pre-existing defect never goes into Act on: list it under Consider or Noted, marked as pre-existing, so it does not block this branch.
 - Zero findings is a valid verdict. Do not promote a nit to fill a section.
-- Add an acceptance table: each criterion from the spec, met, partial, or missing, with evidence.
+- Add an acceptance table: each criterion from the spec, met, partial, or missing, with evidence. `Unchanged:` criteria need evidence that the behavior still works (a test that covers it, or a run), not only that the diff does not touch it.
+- End the verdict with the spec's deferred Non-goals, one line each, as candidates for a follow-up `/spec`. A finding that asks for something the spec left out goes there too, not under Act on.
 
 ## 4. Stop
 

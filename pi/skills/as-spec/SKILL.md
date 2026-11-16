@@ -15,6 +15,8 @@ Read before you ask. Explore the code the request touches. For more than a handf
 
 If the request is trivially clear (a one-liner, a rename), say so and suggest doing it directly without the flow. If it bundles several independent features, say so, propose an order, and spec one at a time.
 
+If the request changes behavior that already exists, find out what currently relies on it: its callers and tests, and the specs in `<main>/.specs/` that built or changed the same area (their `spec.md` and `review.md`, read-only). Keep a short list of what must keep working.
+
 After recon, run `../../references/worktrees.md#detect` and keep the result: the case number plus a note or a question.
 
 ## 2. Clarify
@@ -43,7 +45,14 @@ One message per round with three parts:
 
 Where the work happens comes from the Detect result; do not ask about the branch or worktree again. Always ask whether the build may create checkpoint commits, and how to verify: a fast, targeted check per task (the tests the task touches, the tests it writes under TDD) and the full suite once at the end, or the full suite per task. Measure how long both take and recommend from that. Record both answers under Boundaries.
 
-Turn vague goals into checkable criteria ("faster" becomes "p95 under 200 ms for X"). Repeat rounds until no open point changes what gets built. Then write the spec.
+Turn vague goals into checkable criteria ("faster" becomes "p95 under 200 ms for X"). Repeat rounds until no open point changes what gets built.
+
+Two things the rounds settle, without a question of their own unless they are unclear:
+
+- What must not change: when the request changes existing behavior, propose the behaviors from Recon that must keep working. They become acceptance criteria.
+- What is left out: an idea that comes up but will not be built now (from the user, from you, from the code) goes under Non-goals with its reason, so it is captured and not quietly built or dropped.
+
+Then write the spec.
 
 ## 3. Write the spec
 
@@ -66,9 +75,11 @@ Carried changes: yes                 (only after a carry, see worktrees.md#spec-
 Who, what, why. 2-4 sentences.
 
 ## Non-goals
+- <what> — <why: deferred to a later change, or never>
 
 ## Behavior and acceptance criteria
 - [ ] AC1: <checkable statement, e.g. Given/When/Then>
+- [ ] AC2: Unchanged: <existing behavior that must keep working>   (when the request changes existing behavior)
 
 ## Edge cases and errors
 
