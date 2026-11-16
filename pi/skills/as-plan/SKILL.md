@@ -84,6 +84,7 @@ Verify commands (Verify per task, Final verify, and a task's `Verify:`):
 - Select tests the way CI does. If CI runs one process per file, so does the command.
 - A path filter must already match on the base and must pick up the new test files the tasks add. Check it against the base before you write it down.
 - Task gates are hermetic: no network, no downloads, no services to start. Agents may not install tools or browsers.
+- Commands use only tools the project or the machine provides (its `mise.toml`, its venv, tools on `PATH`). Never a path inside a session's scratchpad or temp dir: `/build` usually runs in another session. If the test runner is missing, say so in the plan approval message instead of working around it.
 - Browser, integration, and E2E lanes go only into Final verify, never into Verify per task or a task's `Verify:`.
 - A gate that runs longer than 10 minutes is aborted and counts as red. Long lanes go into Final verify.
 - `Commits: none` requires `Workstreams: one`.
