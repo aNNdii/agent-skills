@@ -16,16 +16,15 @@ if ! diff -q <(sed -n '/^```mermaid$/,/^```$/p' pi/README.md | sed '1d;$d') pi/f
   err "a) the mermaid block in pi/README.md differs from pi/flow.mmd"
 fi
 
-# b) Every link to a section of the reference matches a heading there.
+# b) Every link to a section of a file in pi/references/ matches a heading there.
 #    Anchor = heading in lowercase, punctuation dropped, spaces as hyphens.
-anchors=""
-if [ -f "$ref" ]; then
-  anchors=$(sed -n 's/^#\{1,6\} \(.*\)$/\1/p' "$ref" | tr 'A-Z' 'a-z' | sed 's/[^a-z0-9 -]//g; s/ /-/g')
-fi
 while IFS= read -r hit; do
   file=${hit%%:*} link=${hit#*:}
-  grep -qxF -- "${link#*#}" <<<"$anchors" || err "b) $file links $link, but $ref has no such heading"
-done < <(grep -rIoE 'worktrees[.]md#[a-z0-9-]+' pi)
+  target=pi/references/${link%%#*}
+  [ -f "$target" ] || continue
+  anchors=$(sed -n 's/^#\{1,6\} \(.*\)$/\1/p' "$target" | tr 'A-Z' 'a-z' | sed 's/[^a-z0-9 -]//g; s/ /-/g')
+  grep -qxF -- "${link#*#}" <<<"$anchors" || err "b) $file links $link, but $target has no such heading"
+done < <(grep -rIoE '[a-z-]+[.]md#[a-z0-9-]+' pi)
 
 # c) A skill that links the reference must not restate its rules.
 tokens=('info/exclude' 'stash push' 'stash pop' 'check-ref-format' 'worktree add' 'symbolic-ref'
@@ -43,9 +42,17 @@ done
 
 # e) Fork boundaries: nothing changed outside pi/ since the branch left <base> (tracked or new
 #    untracked files), no terminal-multiplexer hook. Diff against the merge-base, so new commits
-#    on <base> do not turn this red.
+#    on <base> do not turn this red. package.json may change only in its "pi" manifest block.
 mb=$(git merge-base "$base" HEAD) || { err "e) no merge-base with $base"; mb=$base; }
 outside=$( { git diff --name-only "$mb" -- . ':!pi'; git ls-files --others --exclude-standard -- . ':!pi'; } | sort -u)
+if grep -qx 'package.json' <<<"$outside"; then
+  # Compare both sides without their "pi" block. Any failure (no node, broken JSON) keeps package.json listed.
+  strip='const j=JSON.parse(require("fs").readFileSync(0,"utf8"));delete j.pi;process.stdout.write(JSON.stringify(j))'
+  if old=$(git show "$mb:package.json" | node -e "$strip") && new=$(node -e "$strip" <package.json) &&
+     [ -n "$old" ] && [ "$old" = "$new" ]; then
+    outside=$(grep -vx 'package.json' <<<"$outside")
+  fi
+fi
 [ -z "$outside" ] || err "e) files outside pi/ changed since $base: $(echo $outside)"
 # The bracket keeps this line from matching itself.
 if grep -rIqi 'herd[r]' pi; then err "e) pi/ mentions herd""r"; fi

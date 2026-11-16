@@ -7,7 +7,7 @@ description: Phase 1 of the /spec → /plan → /build → /review flow. Use onl
 
 Goal: a one-page spec the user approved, that a builder can implement without asking back.
 
-No product code, scaffolding, or dependency installs in this phase. Reading and exploring are fine. Language rules: `../../references/language.md`.
+No product code, scaffolding, or dependency installs in this phase. Reading and exploring are fine. Language rules: `../../references/language.md`. Inbox mode: `../../references/inbox.md` decides the shape of every message to the user.
 
 ## 1. Recon
 
@@ -29,7 +29,7 @@ The first clarification message carries the Detect result. In 2a, a note goes in
 
 Use it when you cannot say in two sentences what they want, for whom, and why. Also use it whenever the user asks for one question at a time ("one by one", "grill me", "interview me", or the same in their language). In that case keep one question per message for the whole clarification.
 
-- One question per message about the why: the moment they miss this, who it is for, what success looks like, what would make it a failure even if it technically works.
+- One question per message about the why (in Inbox mode bundled, see `../../references/inbox.md#per-stop`, unless the user asked for one at a time): the moment they miss this, who it is for, what success looks like, what would make it a failure even if it technically works.
 - Anchor in specifics ("Walk me through the last time..."). Add your guess so they can correct it instead of starting from zero. Mention what the code showed when it matters.
 - When you could state goal, user, and success criterion and they would nod, say so and switch to 2b. Carry everything over, never ask twice.
 
@@ -67,9 +67,10 @@ At most one page. Drop empty sections. Mark every decision you made yourself as 
 ```markdown
 # Spec: <title>
 Status: draft
-Branch: <branch> · Base: <base>      (omit all header lines in Detect case 1)
+Branch: <branch> · Base: <base>      (omit in Detect case 1)
 Worktree: linked                     (only in Detect case 2, see worktrees.md#spec-header; else omit)
 Carried changes: yes                 (only after a carry, see worktrees.md#spec-header; else omit)
+Channel: inbox · Thread: <thread>    (only in Inbox mode, see ../../references/inbox.md#thread; else omit)
 
 ## Goal
 Who, what, why. 2-4 sentences.
@@ -106,6 +107,6 @@ Merge the result per `../../references/panel-synthesis.md`. Resolve items the sp
 
 ## 5. Stop for approval
 
-Send: the spec path, a 3-5 line summary, and the synthesized review items. Ask whether to approve or correct, and end your turn.
+Send: the spec path, **Summary** (3-5 lines), **Fixed by the review** (one line each), and **Open items** (the synthesized review items that need the user, numbered). Ask whether to approve or correct, with the choices of `../../references/next-phase.md`, and end your turn.
 
-On answers: update the spec, report only which decisions changed, and ask again only if new open points arose. On approval: set `Status: approved <date>` and name the next step: `/plan <spec path>`, ideally in a fresh session.
+On answers: update the spec, report only which decisions changed, and ask again only if new open points arose. On approval: set `Status: approved <date>` and go on per `../../references/next-phase.md`.

@@ -7,7 +7,7 @@ description: Phase 2 of the /spec → /plan → /build → /review flow. Use onl
 
 Input: an approved spec. Find it per `../../references/worktrees.md#find-the-work-item`: the path or topic from the request, else the newest approved `spec.md`. If its status is not `approved`, stop and say so.
 
-No product code in this phase. Language rules: `../../references/language.md`.
+No product code in this phase. Language rules: `../../references/language.md`. Inbox mode: `../../references/inbox.md` decides the shape of every message to the user.
 
 ## 1. Size check
 
@@ -53,7 +53,7 @@ Signatures as code, bodies `not implemented`.
 
 ## Decisions
 | Question | Chosen | Rejected | Why | Decided by |
-(Decided by: user, consensus, or recommendation (unconfirmed))
+(Decided by: user, user (default) when the user took the recommendation without picking, consensus, or recommendation (unconfirmed))
 
 ## Execution
 - Verify per task: `<fast, hermetic test command, with a terse reporter>`
@@ -98,6 +98,6 @@ Task rules:
 
 ## 5. Stop for approval
 
-Send: the plan path, the design in 5-8 lines, the decisions table, every decision still marked "recommendation (unconfirmed)" as a numbered item, and the tasks one line each. Ask whether to approve or correct, and end your turn.
+Send: the plan path, **Design** (5-8 lines, and the Building blocks view if the plan has one), **Decisions** (the table), **Unconfirmed decisions** (every decision still marked "recommendation (unconfirmed)", numbered), and **Tasks** (one line each). Ask whether to approve or correct, with the choices of `../../references/next-phase.md`, and end your turn.
 
-On approval: set `Status: approved <date>` and name the next step: `/build <plan path>`, ideally in a fresh session.
+On approval: set `Status: approved <date>` and go on per `../../references/next-phase.md`.

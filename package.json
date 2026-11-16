@@ -20,6 +20,7 @@
       "./pi/skills"
     ],
     "prompts": ["./pi/prompts/*.md"],
+    "extensions": ["./pi/extensions/*.ts"],
     "subagents": {
       "agents": ["./agents"],
       "workflows": ["./pi/workflows"]

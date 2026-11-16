@@ -163,11 +163,20 @@ An existing linked worktree is used as it is, whatever its path, who created it,
 
 The repo's parent dir must be writable and persistent. Otherwise worktree creation stops with the path and the error. Deleting a repo leaves its `<wtroot>` behind: remove that orphaned dir by hand. All rules, questions and recovery steps are in [`pi/references/worktrees.md`](references/worktrees.md), see [Parent requirements](references/worktrees.md#parent-requirements).
 
+### Next phase
+
+At the spec approval, the plan approval and after `/build`, you choose how the next phase starts: in this session, in a fresh session, after a compaction, or by yourself. The fresh session and the compaction come from the `flow-next` extension (`pi/extensions/flow-next.ts`): the agent schedules the switch with its `flow_next_phase` tool, and once the turn ends the extension opens the new session in the same terminal and runs the next command. By hand: `/flow-next fresh /build <plan path>` or `/flow-next compact /build <plan path>`. Rules: [`pi/references/next-phase.md`](references/next-phase.md).
+
+### Inbox
+
+With the [Plannotator](https://plannotator.ai/inbox/) Pi extension and its `plannotator_inbox` tool on (`"inboxTool": { "pi": true }` in `~/.plannotator/config.json`), say "via the Inbox" when you start `/spec` or `/flow`. Every stop then goes to one Plannotator Inbox thread instead of the chat, as answerable cards with a recommendation and the spec files as attachments to annotate; `/review` adds a guided code review. Your answer wakes the session, and the spec header keeps the channel for later phases and fresh sessions. Also set `"inboxReminder": { "pi": false }` there: Plannotator's own reminder at session start otherwise sends decisions to the Inbox in every session, whether you asked for it or not. Rules: [`pi/references/inbox.md`](references/inbox.md).
+
 ## Pieces
 
 - `pi/skills/as-*`: the four phases. Invoked through `pi/prompts/*.md`.
+- `pi/extensions/flow-next.ts`: the `flow_next_phase` tool and the `/flow-next` command that start the next phase in a fresh session or after a compaction.
 - `pi/workflows/*.js`: deterministic fan-outs for `SubagentWorkflow` (pi-subagents). Each role has a tier (`high`, `mid`, `low`) and an effort: spec review, design, judge, and final review run high/high, grounding low/medium, implementation mid/medium, hard tasks high/high, and a retry one tier above its first attempt with high effort. The lead resolves the provider's models into `args.tiers` per `pi/references/model-tiers.md`; without it, every agent inherits the session model (only the Explore grounding agent keeps its own small model).
-- `pi/references/`: model tiers (how the lead maps the provider's models to `high`, `mid`, `low`), panel synthesis (consensus, split, single, dismissed), design red flags, language rules (talk and write specs in the user's language, keep repo text, status values, and ids in English), and architecture views (which arc42 / C4 views spec and plan draw, and how).
+- `pi/references/`: model tiers (how the lead maps the provider's models to `high`, `mid`, `low`), panel synthesis (consensus, split, single, dismissed), design red flags, language rules (talk and write specs in the user's language, keep repo text, status values, and ids in English), architecture views (which arc42 / C4 views spec and plan draw, and how), how the next phase starts, and the Inbox channel (above).
 - `pi/skills/principles/`: three short pstack principles, auto-loaded when they apply.
 - `agents/`: the upstream personas, registered as pi subagents.
 

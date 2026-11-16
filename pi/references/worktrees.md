@@ -83,7 +83,7 @@ Probes, run in the current directory:
 
 Cases:
 
-1. No repo, no commit, or bare. Note: "No git repo" / "No commit yet" / "Bare repository", then ": working without a worktree." Write the spec in place, without header lines.
+1. No repo, no commit, or bare. Note: "No git repo" / "No commit yet" / "Bare repository", then ": working without a worktree." Write the spec in place, without the `Branch` line.
 2. Linked worktree: `git rev-parse --show-toplevel` is not `<main>`, whatever its path, who created it, its branch, a detached HEAD, or its changes. Never ask a worktree question here, only give one of these notes, with `<path>` the toplevel:
    - Branch not protected: "Working in `<path>` on `<branch>`. Base assumption: `<base>`." See the base rule below.
    - Protected branch: "Working in `<path>` on `<branch>`. /build cannot commit here: switch this worktree to a non-protected branch yourself first." `<base>` is the current branch.
@@ -138,13 +138,14 @@ The lines right after `Status:` in `spec.md`:
 Branch: <branch> · Base: <base>
 Worktree: linked
 Carried changes: yes
+Channel: inbox · Thread: <thread>
 ```
 
-The `Branch` line is always there, except in case 1. `Worktree: linked` appears only in Detect case 2, and on resume when the resumed spec has it. `Carried changes: yes` appears only after a successful spec step of Carried changes. The two optional lines are independent of each other, and each is omitted when it does not apply. The values come from the Detect case and the choice:
+The `Branch` line is always there, except in case 1. `Worktree: linked` appears only in Detect case 2, and on resume when the resumed spec has it. `Carried changes: yes` appears only after a successful spec step of Carried changes. `Channel: inbox · Thread: <thread>` appears only in Inbox mode, in every Detect case (`inbox.md#thread`). The optional lines are independent of each other, and each is omitted when it does not apply. The values come from the Detect case and the choice:
 
 | Case and choice | `Branch` | `Base` |
 |---|---|---|
-| 1 | no header lines | |
+| 1 | no `Branch` line | |
 | 2, branch not protected | the current branch | the confirmed base assumption |
 | 2, protected branch | the current branch | the current branch |
 | 2, detached HEAD | empty | the full SHA of HEAD |
