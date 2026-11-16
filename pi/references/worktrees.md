@@ -7,7 +7,11 @@ Say notes and questions in the user's language (`language.md`). The texts below 
 ## Terms
 
 - `<main>`: the path of the first `worktree` entry of `git worktree list --porcelain`. If that entry has a `bare` line, or there is no repo, worktree logic is off: say so in one line, skip every other section except Find the work item, and use `git rev-parse --show-toplevel` (else the current directory) as `<main>`.
-- `<wtroot>`: `<dirname of <main>>/.worktrees/<basename of <main>>`. Example: `/workspace/agent-skills` gives `/workspace/.worktrees/agent-skills`. A repo directly in `$HOME` gives `~/.worktrees/<repo>`.
+- `<wtroot>`: the directory that holds the repo's worktrees, never inside `<main>`.
+  - `<main>` is named `main` (layout `<repo>/main` + `<repo>/worktrees/`): `<dirname of <main>>/worktrees`. Example: `~/Developer/github.com/acme/app/main` gives `~/Developer/github.com/acme/app/worktrees`.
+  - Otherwise: `<dirname of <main>>/<basename of <main>>.worktrees`. Example: `/workspace/agent-skills` gives `/workspace/agent-skills.worktrees`.
+- Worktree path of `<b>`: `<wtroot>/<dir>`, where `<dir>` is `<b>` with every `/` replaced by `-`. Example: `feat/flow-worktrees` gives `<wtroot>/feat-flow-worktrees`. This matches tools such as worktrunk with `worktree-path` set to the same layout, so the flow and those tools agree on where a branch's worktree goes.
+- `<wtpath>`: the worktree path of `<branch>`.
 - `<topic>`: the name from Topic and branch. The spec dir, the worktree and the branch all carry it.
 - `<branch>`: `feat/<topic>`, or `fix/<topic>` for a bug fix. In a detected linked worktree (Detect case 2), its current branch, empty when HEAD is detached.
 - `<wt>`: the absolute path of the worktree a phase works in.
@@ -49,7 +53,7 @@ Input: the request, or a name the user gave. Result: `<topic>` and `<branch>`.
 3. `<branch>` is `fix/<topic>` for a bug fix, else `feat/<topic>`.
 4. `git check-ref-format --branch <branch>` must succeed. Otherwise propose another topic.
 5. Run Resume or collision.
-6. Show `<topic>`, `<branch>` and `<wtroot>/<topic>` to the user, inside the Detect note or question, before anything is created.
+6. Show `<topic>`, `<branch>` and `<wtpath>` to the user, inside the Detect note or question, before anything is created.
 
 ## Resume or collision
 
@@ -59,7 +63,7 @@ Input: `<topic>`, `<branch>`. Result: `new`, `resume` with the spec dir, or the 
 2. Otherwise the name is taken when any of these holds:
    - `git -C <main> show-ref --verify --quiet refs/heads/<branch>` succeeds;
    - `git -C <main> for-each-ref refs/heads/<branch>/` prints a ref (directory/file ref conflict);
-   - `<wtroot>/<topic>` exists;
+   - `<wtpath>` exists;
    - a dir `<main>/.specs/*-<topic>/` exists.
 3. Taken: propose `<topic>-2` for the spec dir, the worktree and the branch together, and check it with steps 1-2 again. If `<topic>-2` is taken as well, or a leading part of `<branch>` is itself a branch (`feat` for `feat/<topic>`), ask the user for a name.
 4. Free: `new`.
@@ -86,9 +90,9 @@ Cases:
    - Detached HEAD: "Working in `<path>` on detached HEAD. /build cannot commit here: switch this worktree to a non-protected branch yourself first." `<branch>` is empty, `<base>` is the full SHA of HEAD.
 
    Base rule for a branch that is not protected: `<base>` is the nearest ancestor among these candidates: the branch of `<main>` if protected, the remote default, `main`, `master`, `develop`. Keep those that exist and are ancestors of HEAD (`git merge-base --is-ancestor <candidate> HEAD`), then take the one with the fewest commits in `git rev-list --count <candidate>..HEAD`; the list order only breaks ties. So a branch cut from `develop`, which itself comes from `main`, gets `develop`. If none fits, ask for the base instead of the note.
-3. Main checkout with changes. Question: "Uncommitted changes in `<main>`: `<files>`. (a) carry them into a new worktree `<wtroot>/<topic>` on `<branch>` / (b) leave them here, new worktree from HEAD / (c) abort." Recommend (a) when the changed files belong to this request, else (b).
-4. Main checkout on a protected branch or with detached HEAD. Question: "`<current branch>` is protected" (or "HEAD is detached"), then "(a) new worktree `<wtroot>/<topic>` on `<branch>` now (recommended) / (b) only at /build."
-5. Main checkout on a branch that is not protected, clean. Question: "(a) new worktree `<wtroot>/<topic>` on `<branch>` (recommended) / (b) spec and plan here, worktree at /build."
+3. Main checkout with changes. Question: "Uncommitted changes in `<main>`: `<files>`. (a) carry them into a new worktree `<wtpath>` on `<branch>` / (b) leave them here, new worktree from HEAD / (c) abort." Recommend (a) when the changed files belong to this request, else (b).
+4. Main checkout on a protected branch or with detached HEAD. Question: "`<current branch>` is protected" (or "HEAD is detached"), then "(a) new worktree `<wtpath>` on `<branch>` now (recommended) / (b) only at /build."
+5. Main checkout on a branch that is not protected, clean. Question: "(a) new worktree `<wtpath>` on `<branch>` (recommended) / (b) spec and plan here, worktree at /build."
 
 Before a case 3-5 question, run Topic and branch. If Resume or collision returns `resume`, replace the question with the note "Resuming `<spec dir>` on `<branch>`."
 
@@ -96,12 +100,12 @@ Choices: `carry` (3a), `leave` (3b), `abort` (3c), `now` (4a, 5a), `later` (4b, 
 
 ## Create
 
-Input: `<topic>`, `<branch>`, `<base>`. Excludes has run, and Resume or collision returned `new` (or Locate for build called this section). Result: the absolute worktree path.
+Input: `<topic>`, `<branch>`, `<base>`. Excludes has run, and Resume or collision returned `new` (or Locate for build called this section). Result: the absolute worktree path. In this section `<wtpath>` is the worktree path of the `<branch>` given as input (Terms), also when Workstreams calls it with `<branch>-<name>`.
 
 0. If `<branch>` has a stale entry (Worktree of `<b>` in Terms), drop only that entry first: `git -C <main> worktree remove <path of the stale entry>`. It removes git's admin data of that one worktree, never a dir, a branch or another entry. If git refuses (for example the entry is locked), stop (Stops and recovery).
-1. `git -C <main> worktree add --no-track -b <branch> <wtroot>/<topic> <base>`. Git creates missing parent dirs itself. `--no-track` keeps `<branch>` from taking `<base>` as its upstream. If `<branch>` exists already (`git -C <main> show-ref --verify --quiet refs/heads/<branch>` succeeds), check it out instead of creating it: `git -C <main> worktree add <wtroot>/<topic> <branch>`.
+1. `git -C <main> worktree add --no-track -b <branch> <wtpath> <base>`. Git creates missing parent dirs itself. `--no-track` keeps `<branch>` from taking `<base>` as its upstream. If `<branch>` exists already (`git -C <main> show-ref --verify --quiet refs/heads/<branch>` succeeds), check it out instead of creating it: `git -C <main> worktree add <wtpath> <branch>`.
 2. If it fails because `<wtroot>` cannot be created or written, stop (Stops and recovery). Never fall back to another path. Git may have created `<branch>` before it failed: check with `show-ref` as in step 1 and name it in the report. A rerun of this step then takes the existing-branch variant of step 1.
-3. Tell the user: "Worktree: `<wtroot>/<topic>` on `<branch>`." Every later step uses that absolute path.
+3. Tell the user: "Worktree: `<wtpath>` on `<branch>`." Every later step uses that absolute path.
 
 ## Carried changes
 
@@ -159,11 +163,11 @@ Input: the plan's `Execution` line `Branch: <branch> · Base: <base>`, the spec 
 3. Take the worktree of `<branch>` (Terms).
    - Its path is not `<main>`: use it as `<wt>`, under whatever path it lives. Skip the remaining steps.
    - Its path is `<main>`: the branch is checked out in the main checkout. Go on with step 4.
-   - None, and the spec header has `Worktree: linked`: stop and ask "The worktree of `<branch>` is gone. (a) drop its stale entry and create `<wtroot>/<topic>` / (b) abort and recreate it yourself." (a) goes on with step 4, and Create drops the stale entry first. (b) stops without changes.
+   - None, and the spec header has `Worktree: linked`: stop and ask "The worktree of `<branch>` is gone. (a) drop its stale entry and create `<wtpath>` / (b) abort and recreate it yourself." (a) goes on with step 4, and Create drops the stale entry first. (b) stops without changes.
    - None: go on with step 4. Create drops a stale entry first.
 4. Run Excludes.
-5. `git -C <main> status --porcelain -- . ':!.specs'` lists changes, and the branch is not in `<main>`: ask the Detect case 3 question, with `<branch>` and `<wtroot>/<topic>` from this plan. `carry` and `leave` go on, `abort` stops without changes.
-6. The branch is in `<main>`: ask before switching, also when the spec header has `Worktree: linked`. Clean: "`<branch>` is checked out in `<main>`. To build in a worktree, `<main>` switches to `<base>`. (a) switch and create `<wtroot>/<topic>` (recommended) / (b) abort." With changes, add `<files>` and offer only (a) switch, carry the changes into `<wtroot>/<topic>` / (b) abort, because the changes were made on `<branch>`. On (a): `git -C <main> switch <base>`, or `git -C <main> switch --detach <base>` when `<base>` is a SHA. If git refuses, stop.
+5. `git -C <main> status --porcelain -- . ':!.specs'` lists changes, and the branch is not in `<main>`: ask the Detect case 3 question, with `<branch>` and `<wtpath>` from this plan. `carry` and `leave` go on, `abort` stops without changes.
+6. The branch is in `<main>`: ask before switching, also when the spec header has `Worktree: linked`. Clean: "`<branch>` is checked out in `<main>`. To build in a worktree, `<main>` switches to `<base>`. (a) switch and create `<wtpath>` (recommended) / (b) abort." With changes, add `<files>` and offer only (a) switch, carry the changes into `<wtpath>` / (b) abort, because the changes were made on `<branch>`. On (a): `git -C <main> switch <base>`, or `git -C <main> switch --detach <base>` when `<base>` is a SHA. If git refuses, stop.
 7. Run Create with `<topic>`, `<branch>`, `<base>`. It reuses an existing `<branch>`.
 8. For `carry`, run the spec step of Carried changes with the new `<wt>`. It writes `Carried changes: yes` into the spec, so the build step commits `[wip]` next.
 9. Tell the user: "Building in `<wt>` on `<branch>`."
@@ -211,9 +215,9 @@ On a stop, report the state and the options below, then end your turn. Never dro
 
 ## Parent requirements
 
-Worktrees live next to the repo, in `<wtroot>` under the repo's parent dir. The flow assumes that:
+Worktrees live next to the repo, in `<wtroot>` under the parent dir of `<main>`. The flow assumes that:
 
 - The parent dir of `<main>` is writable, so Create can make `<wtroot>`. If it is not (read-only, or not mounted), Create stops (Stops and recovery). There is no fallback path.
 - The parent dir is persistent. A worktree in a temporary or container-only dir disappears with it. Its commits stay in the repo, but uncommitted work is lost, and git keeps a stale entry until it is dropped (next point).
-- Deleting a repo leaves its `<wtroot>` behind. Git cannot clean it from the deleted repo, so remove the orphaned dir by hand after checking it holds nothing you need: `rm -rf <dirname of the repo>/.worktrees/<repo>`. Remove `<dirname of the repo>/.worktrees` too once it is empty.
+- Deleting only `<main>` leaves its `<wtroot>` behind. Git cannot clean it from the deleted repo, so remove the orphaned dir by hand after checking it holds nothing you need: `rm -rf <wtroot>`. In the `<repo>/main` layout, deleting the whole `<repo>` dir removes both.
 - To remove a single worktree while the repo stays, ask first (Stops and recovery), then run `git -C <main> worktree remove <path>`. The same command drops the entry of a dir that was deleted by hand. `git -C <main> worktree prune` drops the entries of every missing dir at once, including moved or unmounted worktrees, so run it only by hand.
